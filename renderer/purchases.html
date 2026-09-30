@@ -1,0 +1,594 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Purchases | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+    <style>
+        .search-container {
+            position: relative;
+        }
+
+        .bill-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .bill-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:0.25rem;">
+                    <button onclick="window.location.href='index.html'" class="btn btn-outline small"
+                        style="padding:8px; border-radius:10px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size:1.5rem;">Purchase Billing</h1>
+                </div>
+                <p>Record purchases from suppliers & update stock</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="showTab('new')" class="btn btn-primary" id="tabNewBtn">
+                    <i class="fas fa-plus"></i> New Purchase
+                </button>
+                <button onclick="showTab('history')" class="btn btn-outline" id="tabHistoryBtn">
+                    <i class="fas fa-history"></i> History
+                </button>
+
+            </div>
+        </div>
+
+        <!-- NEW PURCHASE TAB -->
+        <div id="tabNew">
+            <div style="display:flex; flex-wrap:wrap; gap:2rem; align-items:start;">
+
+                <!-- LEFT: Supplier + Search -->
+                <div style="width:320px; flex-shrink:0;">
+
+                    <!-- Supplier Details -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Supplier Details</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Supplier</label>
+                            <select id="supplierSelect" onchange="onSupplierSelect()" style="width:100%;">
+                                <option value="">-- Select or type below --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Supplier Name <span style="color:red;">*</span></label>
+                            <input id="suppName" placeholder="Supplier name">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input id="suppPhone" placeholder="Phone">
+                            </div>
+                            <div class="form-group">
+                                <label>GSTIN</label>
+                                <input id="suppGstin" placeholder="27XXXXX...">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Supplier Invoice No.</label>
+                            <input id="suppInvoice" placeholder="INV-001">
+                        </div>
+                    </div>
+
+                    <!-- Product Search -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Find Product</h2>
+                        </div>
+                        <div class="search-container">
+                            <input type="text" id="purchaseSearch" placeholder="🔍 Search product..."
+                                onkeyup="searchPurchaseProduct()">
+                            <div id="purchaseSearchResults" class="search-results" style="display:none;"></div>
+                        </div>
+                        <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem;">Or add a new
+                                item not in inventory:</p>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                                <input id="newItemName" placeholder="Item name" style="font-size:0.85rem;">
+                                <input id="newItemHsn" placeholder="HSN Code" style="font-size:0.85rem;">
+                                <input id="newItemQty" placeholder="Qty" type="number" min="1"
+                                    style="font-size:0.85rem;">
+                                <input id="newItemPrice" placeholder="Price ₹" type="number" min="0"
+                                    style="font-size:0.85rem;">
+                                <input id="newItemGst" placeholder="GST %" type="number" min="0"
+                                    style="font-size:0.85rem;">
+                                <button class="btn btn-outline" style="font-size:0.85rem;" onclick="addNewItem()">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT: Purchase Table -->
+                <div class="card" style="flex:1; min-width:480px; padding:0; overflow:hidden;">
+                    <div class="card-header" style="padding:1.5rem; margin-bottom:0;">
+                        <h2>Purchase Items</h2>
+                        <span id="itemCount" style="font-size:0.8rem; color:var(--text-muted);">0 items</span>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>HSN</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>GST%</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseItems"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="padding:1.5rem; background:#f9fafb; border-radius:0 0 1rem 1rem;">
+                        <div class="bill-summary-row">
+                            <span>Subtotal (Excl. Tax)</span>
+                            <span id="pSubTotal">₹0.00</span>
+                        </div>
+                        <div class="bill-summary-row">
+                            <span>Total GST</span>
+                            <span id="pTotalGST">₹0.00</span>
+                        </div>
+                        <div class="bill-total-row">
+                            <span style="font-weight:700; font-size:1.125rem;">Grand Total</span>
+                            <span style="font-weight:800; font-size:1.5rem; color:#f59e0b;">₹<span
+                                    id="pGrandTotal">0.00</span></span>
+                        </div>
+                        <button class="btn btn-primary"
+                            style="width:100%; margin-top:1.5rem; padding:1rem; background:#f59e0b;"
+                            onclick="savePurchase()">
+                            <i class="fas fa-save"></i> <span id="saveBtnText">Save Purchase & Update Stock</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="tabHistory" style="display:none;">
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="card-header" style="padding:1.25rem 1.5rem; margin-bottom:0; background:#f9fafb;">
+                    <h2 style="font-size:1rem;">Purchase History</h2>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input id="historySearch" placeholder="Search supplier or invoice..."
+                            style="margin-bottom:0; width:220px; font-size:0.875rem;" onkeyup="filterHistory()">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice No.</th>
+                                <th>Supplier</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>GST</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseHistoryTable">
+                            <tr>
+                                <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                                    Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PURCHASE DETAIL POPUP -->
+    <div class="popup" id="detailPopup">
+        <div class="popup-box" style="width:680px; max-width:95vw; border-radius:16px; padding:0; overflow:hidden;">
+            <div
+                style="padding:1.5rem; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 style="margin:0; font-size:1.2rem;" id="detailTitle">Purchase Details</h2>
+                    <small id="detailSupplier" style="opacity:0.85;"></small>
+                </div>
+                <button onclick="closeDetail()"
+                    style="background:rgba(255,255,255,0.15); border:none; color:white; width:32px; height:32px; border-radius:50%; cursor:pointer;">✕</button>
+            </div>
+            <div style="padding:1.5rem;">
+                <div class="table-container">
+                    <table id="detailTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>HSN</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>GST%</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <script src="sidebar.js"></script>
+    <script>
+        let purchaseCart = [];
+        let allProducts = [];
+        let allSuppliers = [];
+        let allPurchases = [];
+        let editModeId = null;
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = `toast-${type}`;
+            t.style.display = "block";
+            setTimeout(() => t.style.display = "none", 3000);
+        }
+
+        function showTab(tab) {
+            document.getElementById("tabNew").style.display = tab === 'new' ? 'block' : 'none';
+            document.getElementById("tabHistory").style.display = tab === 'history' ? 'block' : 'none';
+            document.getElementById("tabNewBtn").className = tab === 'new' ? 'btn btn-primary' : 'btn btn-outline';
+            document.getElementById("tabHistoryBtn").className = tab === 'history' ? 'btn btn-primary' : 'btn btn-outline';
+            if (tab === 'history') loadPurchaseHistory();
+        }
+
+        async function loadInitialData() {
+            try {
+                const [pRes, sRes] = await Promise.all([
+                    fetch(window.apiUrl("/products")),
+                    fetch(window.apiUrl("/suppliers"))
+                ]);
+                allProducts = await pRes.json();
+                allSuppliers = await sRes.json();
+
+                // Populate supplier dropdown
+                const sel = document.getElementById("supplierSelect");
+                allSuppliers.forEach(s => {
+                    const opt = document.createElement("option");
+                    opt.value = s.id;
+                    opt.text = s.name;
+                    sel.appendChild(opt);
+                });
+
+                // Check for edit mode
+                const urlParams = new URLSearchParams(window.location.search);
+                const editId = urlParams.get('edit');
+                if (editId) {
+                    editModeId = editId;
+                    document.getElementById("saveBtnText").innerText = "Update Purchase";
+                    document.getElementById("tabNewBtn").innerHTML = '<i class="fas fa-edit"></i> Edit Purchase';
+                    
+                    // Fetch purchase details
+                    const purRes = await fetch(window.apiUrl(`/purchases`));
+                    const purchases = await purRes.json();
+                    const pur = purchases.find(p => p.id == editId);
+                    
+                    if (pur) {
+                        document.getElementById("supplierSelect").value = pur.supplier_id || "";
+                        onSupplierSelect();
+                        document.getElementById("suppName").value = pur.supplier_name || "";
+                        document.getElementById("suppInvoice").value = pur.invoice_number || "";
+                        
+                        // Fetch items
+                        const itemRes = await fetch(window.apiUrl(`/purchase-detail/${editId}`));
+                        const items = await itemRes.json();
+                        purchaseCart = items.map(i => ({
+                            ...i,
+                            gst: i.gst || 0
+                        }));
+                        renderCart();
+                    }
+                }
+            } catch (e) { console.error("Load error:", e); }
+        }
+
+        function onSupplierSelect() {
+            const id = document.getElementById("supplierSelect").value;
+            if (!id) return;
+            const s = allSuppliers.find(x => x.id == id);
+            if (!s) return;
+            document.getElementById("suppName").value = s.name;
+            document.getElementById("suppPhone").value = s.phone || "";
+            document.getElementById("suppGstin").value = s.gstin || "";
+        }
+
+        function searchPurchaseProduct() {
+            const query = document.getElementById("purchaseSearch").value.toLowerCase();
+            const resultsDiv = document.getElementById("purchaseSearchResults");
+            if (!query) { resultsDiv.style.display = "none"; return; }
+            const filtered = allProducts.filter(p =>
+                p.name.toLowerCase().includes(query) || (p.hsn_code && p.hsn_code.includes(query))
+            );
+            if (filtered.length > 0) {
+                resultsDiv.innerHTML = filtered.map(p => `
+                <div class="search-item" onclick="addProductToCart(${p.id})">
+                    <strong>${p.name}</strong> <small>(Stock: ${p.quantity})</small><br>
+                    <small>Buy: ₹${p.purchase_price} | HSN: ${p.hsn_code || '-'}</small>
+                </div>
+            `).join("");
+                resultsDiv.style.display = "block";
+            } else { resultsDiv.style.display = "none"; }
+        }
+
+        function addProductToCart(id) {
+            const p = allProducts.find(x => x.id == id);
+            if (!p) return;
+            const existing = purchaseCart.find(x => x.product_id == id);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                purchaseCart.push({
+                    product_id: p.id,
+                    product_name: p.name,
+                    hsn_code: p.hsn_code || "",
+                    quantity: 1,
+                    purchase_price: p.purchase_price || 0,
+                    gst: p.gst || 0
+                });
+            }
+            document.getElementById("purchaseSearch").value = "";
+            document.getElementById("purchaseSearchResults").style.display = "none";
+            renderCart();
+        }
+
+        function addNewItem() {
+            const name = document.getElementById("newItemName").value.trim();
+            const qty = parseInt(document.getElementById("newItemQty").value) || 1;
+            const price = parseFloat(document.getElementById("newItemPrice").value) || 0;
+            const gst = parseFloat(document.getElementById("newItemGst").value) || 0;
+            const hsn = document.getElementById("newItemHsn").value.trim();
+            if (!name) { showToast("Item name required âŒ", "error"); return; }
+            purchaseCart.push({ product_id: 0, product_name: name, hsn_code: hsn, quantity: qty, purchase_price: price, gst });
+            ["newItemName", "newItemHsn", "newItemQty", "newItemPrice", "newItemGst"].forEach(id => document.getElementById(id).value = "");
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById("purchaseItems");
+            const countEl = document.getElementById("itemCount");
+            let subTotal = 0, totalGST = 0;
+
+            if (purchaseCart.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">Search and add products above</td></tr>`;
+                if (countEl) countEl.innerText = "0 items";
+                document.getElementById("pSubTotal").innerText = "₹0.00";
+                document.getElementById("pTotalGST").innerText = "₹0.00";
+                document.getElementById("pGrandTotal").innerText = "0.00";
+                return;
+            }
+
+            tbody.innerHTML = purchaseCart.map((item, i) => {
+                const taxable = item.purchase_price * item.quantity;
+                const gstAmt = (taxable * item.gst) / 100;
+                subTotal += taxable;
+                totalGST += gstAmt;
+                return `
+            <tr>
+                <td><strong>${item.product_name}</strong>${item.product_id ? '' : ' <span style="font-size:0.7rem; color:#f59e0b; background:#fef3c7; padding:1px 5px; border-radius:4px;">New</span>'}</td>
+                <td><small>${item.hsn_code || '—'}</small></td>
+                <td><input type="number" value="${item.quantity}" min="1"
+                    onchange="updateCartQty(${i}, this.value)"
+                    style="width:60px; margin:0; font-size:0.85rem;"></td>
+                <td><input type="number" value="${item.purchase_price}" min="0" step="0.01"
+                    onchange="updateCartPrice(${i}, this.value)"
+                    style="width:80px; margin:0; font-size:0.85rem;"></td>
+                <td>${item.gst}%</td>
+                <td><strong>₹${Math.round(taxable + gstAmt).toLocaleString('en-IN')}</strong></td>
+                <td><button onclick="removeCartItem(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:1rem;">✖</button></td>
+            </tr>`;
+            }).join("");
+
+            if (countEl) countEl.innerText = `${purchaseCart.length} item${purchaseCart.length !== 1 ? 's' : ''}`;
+            document.getElementById("pSubTotal").innerText = `₹${Math.round(subTotal).toLocaleString('en-IN')}`;
+            document.getElementById("pTotalGST").innerText = `₹${Math.round(totalGST).toLocaleString('en-IN')}`;
+            document.getElementById("pGrandTotal").innerText = Math.round(subTotal + totalGST).toLocaleString('en-IN');
+        }
+
+        function updateCartQty(i, val) {
+            purchaseCart[i].quantity = Math.max(1, parseInt(val) || 1);
+            renderCart();
+        }
+
+        function updateCartPrice(i, val) {
+            purchaseCart[i].purchase_price = parseFloat(val) || 0;
+            renderCart();
+        }
+
+        function removeCartItem(i) {
+            purchaseCart.splice(i, 1);
+            renderCart();
+        }
+
+        async function savePurchase() {
+            const suppName = document.getElementById("suppName").value.trim();
+            if (!suppName) { showToast("Supplier name required âŒ", "error"); return; }
+            if (purchaseCart.length === 0) { showToast("Add items first âŒ", "error"); return; }
+
+            let subTotal = 0, totalGST = 0;
+            purchaseCart.forEach(item => {
+                const t = item.purchase_price * item.quantity;
+                subTotal += t;
+                totalGST += (t * item.gst) / 100;
+            });
+
+            const data = {
+                supplier_id: document.getElementById("supplierSelect").value || 0,
+                supplier_name: suppName,
+                invoice_number: document.getElementById("suppInvoice").value.trim() || `PUR/${Date.now().toString().slice(-6)}`,
+                total_amount: Math.round(subTotal + totalGST),
+                gst_amount: Math.round(totalGST),
+                items: purchaseCart,
+                shop_id: window.SHOP_ID
+            };
+
+            try {
+                let res;
+                if (editModeId) {
+                    res = await fetch(window.API + "/edit-purchase/" + editModeId, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    res = await fetch(window.API + "/add-purchase", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+                }
+                if (res.ok) {
+                    showToast(editModeId ? "Purchase updated & stock updated ✅" : "Purchase saved & stock updated ✅");
+                    purchaseCart = [];
+                    renderCart();
+                    ["suppName", "suppPhone", "suppGstin", "suppInvoice"].forEach(id => document.getElementById(id).value = "");
+                    document.getElementById("supplierSelect").value = "";
+                    if (editModeId) {
+                        setTimeout(() => window.location.href = "suppliers.html", 1000);
+                    } else {
+                        loadInitialData();
+                    }
+                } else {
+                    showToast("Failed to save âŒ", "error");
+                }
+            } catch (e) { showToast("Connection error âŒ", "error"); }
+        }
+
+        async function loadPurchaseHistory() {
+            try {
+                const res = await fetch(window.apiUrl("/purchases"));
+                allPurchases = await res.json();
+                renderHistory(allPurchases);
+            } catch (e) { showToast("Failed to load history âŒ", "error"); }
+        }
+
+        function renderHistory(list) {
+            const tbody = document.getElementById("purchaseHistoryTable");
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">No purchases found</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(p => `
+            <tr>
+                <td><code style="background:#fef3c7; padding:3px 8px; border-radius:5px; font-size:0.8rem; color:#92400e;">${p.invoice_number || '—'}</code></td>
+                <td style="font-weight:600; color:#f59e0b;">${p.supplier_name || '—'}</td>
+                <td style="color:var(--text-muted); font-size:0.85rem;">${new Date(p.date).toLocaleDateString('en-IN')}</td>
+                <td style="font-weight:700;">₹${Math.round(p.total_amount).toLocaleString('en-IN')}</td>
+                <td style="color:var(--text-muted);">₹${Math.round(p.gst_amount || 0).toLocaleString('en-IN')}</td>
+                <td style="text-align:right;">
+                    <div style="display:flex; gap:6px; justify-content:flex-end;">
+                        <button class="btn btn-outline" style="padding:6px 10px; color:#f59e0b; border-color:#f59e0b;" onclick="viewPurchaseDetail(${p.id}, '${p.invoice_number}', '${p.supplier_name}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-outline" style="padding:6px 10px; color:#0ea5e9; border-color:#0ea5e9;" onclick="window.location.href='purchases.html?edit=${p.id}'">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline" style="padding:6px 10px; color:var(--danger); border-color:var(--danger);" onclick="deletePurchase(${p.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join("");
+        }
+
+        function filterHistory() {
+            const q = document.getElementById("historySearch").value.toLowerCase();
+            const filtered = allPurchases.filter(p =>
+                (p.supplier_name && p.supplier_name.toLowerCase().includes(q)) ||
+                (p.invoice_number && p.invoice_number.toLowerCase().includes(q))
+            );
+            renderHistory(filtered);
+        }
+
+        async function viewPurchaseDetail(id, invoice, supplier) {
+            document.getElementById("detailTitle").innerText = invoice || "Purchase Details";
+            document.getElementById("detailSupplier").innerText = supplier || "";
+            document.getElementById("detailPopup").style.display = "flex";
+            try {
+                const res = await fetch(window.API + "/purchase-detail/" + id);
+                const items = await res.json();
+                const tbody = document.getElementById("detailTableBody");
+                if (!items || items.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No items found</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = items.map(item => {
+                    const total = item.purchase_price * item.quantity;
+                    const gstAmt = (total * (item.gst || 0)) / 100;
+                    return `
+                <tr>
+                    <td><strong>${item.product_name || '—'}</strong></td>
+                    <td>${item.hsn_code || '—'}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${Math.round(item.purchase_price).toLocaleString('en-IN')}</td>
+                    <td>${item.gst || 0}%</td>
+                    <td><strong>₹${Math.round(total + gstAmt).toLocaleString('en-IN')}</strong></td>
+                </tr>`;
+                }).join("");
+            } catch (e) { }
+        }
+
+        async function deletePurchase(id) {
+            if (!confirm("Delete this purchase? Stock will be reversed.")) return;
+            try {
+                const res = await fetch(window.API + "/delete-purchase/" + id, { method: "DELETE" });
+                if (res.ok) { showToast("Purchase deleted ✅"); loadPurchaseHistory(); }
+            } catch (e) { showToast("Failed âŒ", "error"); }
+        }
+
+        function closeDetail() { document.getElementById("detailPopup").style.display = "none"; }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadInitialData();
+        });
+
+        window.showTab = showTab;
+        window.onSupplierSelect = onSupplierSelect;
+        window.searchPurchaseProduct = searchPurchaseProduct;
+        window.addProductToCart = addProductToCart;
+        window.addNewItem = addNewItem;
+        window.updateCartQty = updateCartQty;
+        window.updateCartPrice = updateCartPrice;
+        window.removeCartItem = removeCartItem;
+        window.savePurchase = savePurchase;
+        window.viewPurchaseDetail = viewPurchaseDetail;
+        window.deletePurchase = deletePurchase;
+        window.closeDetail = closeDetail;
+        window.filterHistory = filterHistory;
+    </script>
+</body>
+
+</html>

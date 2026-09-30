@@ -1,0 +1,476 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Suppliers | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:0.25rem;">
+                    <button onclick="window.location.href='index.html'" class="btn btn-outline small"
+                        style="padding:8px; border-radius:10px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size:1.5rem;">Suppliers</h1>
+                </div>
+                <p>Manage your supplier master list</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="window.location.href='index.html'" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
+
+            </div>
+        </div>
+
+        <!-- ADD SUPPLIER FORM -->
+        <div class="card"
+            style="margin-bottom:2rem; padding:0; overflow:hidden; border:none; box-shadow:var(--shadow-lg);">
+            <div onclick="toggleForm()"
+                style="padding:1.25rem 2rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, #0ea5e9, #0284c7); color:white;">
+                <h3 style="margin:0; font-size:1.1rem; font-weight:700;">
+                    <i class="fas fa-truck" style="margin-right:10px;"></i>
+                    <span id="formTitle">Add New Supplier</span>
+                </h3>
+                <i class="fas fa-chevron-down" id="toggleIcon" style="transition:transform 0.3s;"></i>
+            </div>
+
+            <div id="supplierFormSection" style="display:none; padding:2rem; background:white;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem;">
+                    <div class="form-group">
+                        <label>Supplier Name <span style="color:red;">*</span></label>
+                        <input id="sName" placeholder="Business or person name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input id="sPhone" placeholder="10-digit mobile"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label>GSTIN</label>
+                        <input id="sGstin" placeholder="27XXXXX..." style="text-transform:uppercase;">
+                    </div>
+                </div>
+                <div
+                    style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-top:0.5rem;">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input id="sAddress" placeholder="Full address">
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        <input id="sState" placeholder="Maharashtra" list="stateList">
+                    </div>
+                    <div class="form-group">
+                        <label>State Code</label>
+                        <input id="sStateCode" placeholder="27">
+                    </div>
+                </div>
+                <div
+                    style="display:flex; gap:1rem; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border);">
+                    <button class="btn btn-primary" style="background:#0ea5e9; padding:0.75rem 2rem;"
+                        onclick="saveSupplier()">
+                        <i class="fas fa-save"></i> <span id="saveBtnText">Save Supplier</span>
+                    </button>
+                    <button id="cancelBtn" class="btn btn-outline" style="display:none; padding:0.75rem 2rem;"
+                        onclick="resetForm()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH + TABLE -->
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div class="card-header" style="padding:1.25rem 1.5rem; margin-bottom:0; background:#f9fafb;">
+                <div style="display:flex; align-items:center; gap:1rem; width:100%;">
+                    <i class="fas fa-search" style="color:var(--text-muted);"></i>
+                    <input id="searchInput" placeholder="Search by name, phone or GSTIN..."
+                        style="margin-bottom:0; border:none; background:transparent; font-size:1rem; width:100%;"
+                        onkeyup="filterSuppliers()">
+                </div>
+                <span id="supplierCount"
+                    style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap; align-self:center;">0
+                    suppliers</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Supplier</th>
+                            <th>Phone</th>
+                            <th>GSTIN</th>
+                            <th>State</th>
+                            <th>Total Purchases</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierTable">
+                        <tr>
+                            <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- VIEW SUPPLIER POPUP -->
+    <div class="popup" id="viewPopup">
+        <div class="popup-box" style="width:650px; max-width:95vw; border-radius:16px; padding:0; overflow:hidden;">
+            <div
+                style="padding:1.5rem; background:linear-gradient(135deg,#0ea5e9,#0284c7); color:white; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 style="margin:0; font-size:1.2rem;" id="viewName">Supplier Details</h2>
+                    <small id="viewPhone" style="opacity:0.8;"></small>
+                </div>
+                <button onclick="closeView()"
+                    style="background:rgba(255,255,255,0.15); border:none; color:white; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem;">✕</button>
+            </div>
+            <div style="padding:1.5rem;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+                    <div style="background:#f8fafc; padding:1rem; border-radius:10px;">
+                        <div
+                            style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">
+                            GSTIN</div>
+                        <div style="font-weight:600;" id="viewGstin">—</div>
+                    </div>
+                    <div style="background:#f8fafc; padding:1rem; border-radius:10px;">
+                        <div
+                            style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">
+                            State</div>
+                        <div style="font-weight:600;" id="viewState">—</div>
+                    </div>
+                </div>
+                <div style="background:#f8fafc; padding:1rem; border-radius:10px; margin-bottom:1.5rem;">
+                    <div
+                        style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">
+                        Address</div>
+                    <div id="viewAddress">—</div>
+                </div>
+
+                <!-- Purchase History -->
+                <h3 style="font-size:0.95rem; margin-bottom:0.75rem; font-weight:600;">Recent Purchases</h3>
+                <div class="table-container" style="max-height:200px; overflow-y:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplierPurchasesTable">
+                            <tr>
+                                <td colspan="3" style="text-align:center; color:var(--text-muted);">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <datalist id="stateList">
+        <option value="Andhra Pradesh">
+        <option value="Arunachal Pradesh">
+        <option value="Assam">
+        <option value="Bihar">
+        <option value="Chhattisgarh">
+        <option value="Delhi">
+        <option value="Goa">
+        <option value="Gujarat">
+        <option value="Haryana">
+        <option value="Himachal Pradesh">
+        <option value="Jharkhand">
+        <option value="Karnataka">
+        <option value="Kerala">
+        <option value="Madhya Pradesh">
+        <option value="Maharashtra">
+        <option value="Manipur">
+        <option value="Meghalaya">
+        <option value="Mizoram">
+        <option value="Nagaland">
+        <option value="Odisha">
+        <option value="Punjab">
+        <option value="Rajasthan">
+        <option value="Sikkim">
+        <option value="Tamil Nadu">
+        <option value="Telangana">
+        <option value="Tripura">
+        <option value="Uttar Pradesh">
+        <option value="Uttarakhand">
+        <option value="West Bengal">
+    </datalist>
+
+    <div id="toast"></div>
+    <script src="sidebar.js"></script>
+    <script>
+        let allSuppliers = [];
+        let editingId = null;
+        let supplierPurchases = {};
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = `toast-${type}`;
+            t.style.display = "block";
+            setTimeout(() => t.style.display = "none", 3000);
+        }
+
+        function toggleForm() {
+            const section = document.getElementById("supplierFormSection");
+            const icon = document.getElementById("toggleIcon");
+            const isHidden = section.style.display === "none";
+            section.style.display = isHidden ? "block" : "none";
+            icon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+        }
+
+        async function loadSuppliers() {
+            try {
+                const res = await fetch(window.apiUrl("/suppliers"));
+                allSuppliers = await res.json();
+
+                // Load purchases to calculate totals per supplier
+                const pRes = await fetch(window.apiUrl("/purchases"));
+                const purchases = await pRes.json();
+                supplierPurchases = {};
+                purchases.forEach(p => {
+                    if (!supplierPurchases[p.supplier_id]) supplierPurchases[p.supplier_id] = { total: 0, list: [] };
+                    supplierPurchases[p.supplier_id].total += (p.total_amount || 0);
+                    supplierPurchases[p.supplier_id].list.push(p);
+                });
+
+                renderSuppliers(allSuppliers);
+            } catch (e) { showToast("Failed to load suppliers âŒ", "error"); }
+        }
+
+        function renderSuppliers(list) {
+            const tbody = document.getElementById("supplierTable");
+            const countEl = document.getElementById("supplierCount");
+            if (countEl) countEl.innerText = `${list.length} supplier${list.length !== 1 ? 's' : ''}`;
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">No suppliers found. Add your first supplier above!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(s => {
+                const totalPurchases = supplierPurchases[s.id] ? supplierPurchases[s.id].total : 0;
+                return `
+            <tr>
+                <td>
+                    <div style="font-weight:700; color:#0ea5e9;">${s.name}</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Since ${new Date(s.created_at).toLocaleDateString('en-IN')}</div>
+                </td>
+                <td>${s.phone || '—'}</td>
+                <td><code style="background:#f1f5f9; padding:3px 8px; border-radius:5px; font-size:0.8rem;">${s.gstin || '—'}</code></td>
+                <td>${s.state || '—'}</td>
+                <td style="color:#0ea5e9; font-weight:600;">₹${Math.round(totalPurchases).toLocaleString('en-IN')}</td>
+                <td style="text-align:right;">
+                    <div style="display:flex; gap:6px; justify-content:flex-end;">
+                        <button class="btn btn-outline" style="padding:6px 10px; color:#0ea5e9; border-color:#0ea5e9;" onclick="viewSupplier(${s.id})" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-outline" style="padding:6px 10px; color:var(--secondary); border-color:var(--secondary);" onclick="editSupplier(${s.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline" style="padding:6px 10px; color:var(--danger); border-color:var(--danger);" onclick="deleteSupplier(${s.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+            }).join("");
+        }
+
+        function filterSuppliers() {
+            const q = document.getElementById("searchInput").value.toLowerCase();
+            const filtered = allSuppliers.filter(s =>
+                (s.name && s.name.toLowerCase().includes(q)) ||
+                (s.phone && s.phone.includes(q)) ||
+                (s.gstin && s.gstin.toLowerCase().includes(q))
+            );
+            renderSuppliers(filtered);
+        }
+
+        async function saveSupplier() {
+            const name = document.getElementById("sName").value.trim();
+            if (!name) { showToast("Supplier name is required âŒ", "error"); return; }
+
+            const data = {
+                name,
+                phone: document.getElementById("sPhone").value.trim(),
+                gstin: document.getElementById("sGstin").value.trim().toUpperCase(),
+                address: document.getElementById("sAddress").value.trim(),
+                state: document.getElementById("sState").value.trim(),
+                state_code: document.getElementById("sStateCode").value.trim(),
+                shop_id: window.SHOP_ID
+            };
+
+            const url = editingId ? "/update-supplier" : "/add-supplier";
+            if (editingId) data.id = editingId;
+
+            try {
+                const res = await fetch(window.API + url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast(editingId ? "Supplier updated ✅" : "Supplier added ✅");
+                    resetForm();
+                    loadSuppliers();
+                } else {
+                    showToast("Failed to save âŒ", "error");
+                }
+            } catch (e) { showToast("Connection error âŒ", "error"); }
+        }
+
+        function editSupplier(id) {
+            const s = allSuppliers.find(x => x.id === id);
+            if (!s) return;
+            editingId = id;
+            document.getElementById("sName").value = s.name;
+            document.getElementById("sPhone").value = s.phone || "";
+            document.getElementById("sGstin").value = s.gstin || "";
+            document.getElementById("sAddress").value = s.address || "";
+            document.getElementById("sState").value = s.state || "";
+            document.getElementById("sStateCode").value = s.state_code || "";
+            document.getElementById("saveBtnText").innerText = "Update Supplier";
+            document.getElementById("cancelBtn").style.display = "inline-flex";
+            document.getElementById("formTitle").innerText = "Edit Supplier";
+
+            const section = document.getElementById("supplierFormSection");
+            if (section.style.display === "none") toggleForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            editingId = null;
+            ["sName", "sPhone", "sGstin", "sAddress", "sState", "sStateCode"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+            document.getElementById("saveBtnText").innerText = "Save Supplier";
+            document.getElementById("cancelBtn").style.display = "none";
+            document.getElementById("formTitle").innerText = "Add New Supplier";
+        }
+
+        async function deleteSupplier(id) {
+            if (!confirm("Delete this supplier?")) return;
+            try {
+                const res = await fetch(window.API + "/delete-supplier/" + id, { method: "DELETE" });
+                if (res.ok) { showToast("Deleted ✅"); loadSuppliers(); }
+            } catch (e) { showToast("Failed âŒ", "error"); }
+        }
+
+        function viewSupplier(id) {
+            const s = allSuppliers.find(x => x.id === id);
+            if (!s) return;
+            document.getElementById("viewName").innerText = s.name;
+            document.getElementById("viewPhone").innerText = s.phone || "No phone";
+            document.getElementById("viewGstin").innerText = s.gstin || "—";
+            document.getElementById("viewState").innerText = `${s.state || '—'} ${s.state_code ? '(' + s.state_code + ')' : ''}`;
+            document.getElementById("viewAddress").innerText = s.address || "—";
+            document.getElementById("viewPopup").style.display = "flex";
+
+            // Load purchase history
+            const tbody = document.getElementById("supplierPurchasesTable");
+            const purchases = supplierPurchases[id] ? supplierPurchases[id].list : [];
+            if (!purchases || purchases.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No purchases found</td></tr>`;
+            } else {
+                tbody.innerHTML = purchases.slice(0, 10).map(p => `
+                <tr>
+                    <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${p.invoice_number || '—'}</code></td>
+                    <td style="color:var(--text-muted); font-size:0.8rem;">${new Date(p.date).toLocaleDateString('en-IN')}</td>
+                    <td style="font-weight:700; color:#0ea5e9;">₹${Math.round(p.total_amount).toLocaleString('en-IN')}</td>
+                    <td style="text-align:right;">
+                        <div style="display:flex; gap:6px; justify-content:flex-end;">
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem; color:#0ea5e9; border-color:#0ea5e9;" onclick="editPurchase(${p.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem; color:var(--danger); border-color:var(--danger);" onclick="deletePurchase(${p.id}, ${id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+            }
+        }
+
+        async function deletePurchase(purchaseId, supplierId) {
+            if (!confirm("Delete this purchase?")) return;
+            try {
+                const res = await fetch(window.API + '/delete-purchase/' + purchaseId, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast("Purchase Deleted ✅");
+                    await loadSuppliers();
+                    if (document.getElementById("viewPopup").style.display !== "none") {
+                        viewSupplier(supplierId);
+                    }
+                } else {
+                    showToast("Failed to delete âŒ", "error");
+                }
+            } catch (e) {
+                showToast("Connection Error âŒ", "error");
+            }
+        }
+
+        function editPurchase(purchaseId) {
+            window.location.href = `purchases.html?edit=${purchaseId}`;
+        }
+
+        function closeView() {
+            document.getElementById("viewPopup").style.display = "none";
+        }
+
+        // State code auto-fill
+        const stateCodeMap = {
+            "Jammu & Kashmir": "01", "Himachal Pradesh": "02", "Punjab": "03", "Chandigarh": "04",
+            "Uttarakhand": "05", "Haryana": "06", "Delhi": "07", "Rajasthan": "08", "Uttar Pradesh": "09",
+            "Bihar": "10", "Sikkim": "11", "Arunachal Pradesh": "12", "Nagaland": "13", "Manipur": "14",
+            "Mizoram": "15", "Tripura": "16", "Meghalaya": "17", "Assam": "18", "West Bengal": "19",
+            "Jharkhand": "20", "Odisha": "21", "Chhattisgarh": "22", "Madhya Pradesh": "23",
+            "Gujarat": "24", "Maharashtra": "27", "Karnataka": "29", "Goa": "30", "Kerala": "32",
+            "Tamil Nadu": "33", "Puducherry": "34", "Telangana": "36", "Andhra Pradesh": "37", "Ladakh": "38"
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const stateInput = document.getElementById("sState");
+            const codeInput = document.getElementById("sStateCode");
+            if (stateInput) {
+                stateInput.addEventListener("input", () => {
+                    if (stateCodeMap[stateInput.value.trim()]) {
+                        codeInput.value = stateCodeMap[stateInput.value.trim()];
+                    }
+                });
+            }
+            loadSuppliers();
+        });
+
+        window.saveSupplier = saveSupplier;
+        window.editSupplier = editSupplier;
+        window.deleteSupplier = deleteSupplier;
+        window.viewSupplier = viewSupplier;
+        window.closeView = closeView;
+        window.resetForm = resetForm;
+        window.filterSuppliers = filterSuppliers;
+        window.toggleForm = toggleForm;
+    </script>
+</body>
+
+</html>

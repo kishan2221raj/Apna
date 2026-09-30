@@ -1,0 +1,809 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reports | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+    <script src="libs/chart.js"></script>
+    <style>
+        .report-tab {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .report-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pl-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .pl-row:last-child {
+            border-bottom: none;
+        }
+
+        .pl-row.total {
+            background: #f0fdf4;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .pl-row.loss {
+            background: #fef2f2;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        @media print {
+
+            .sidebar,
+            .top-bar,
+            .report-tabs,
+            .filter-bar,
+            .no-print {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:0.25rem;">
+                    <button onclick="window.location.href='index.html'" class="btn btn-outline small"
+                        style="padding:8px; border-radius:10px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size:1.5rem;">Reports</h1>
+                </div>
+                <p>GST Reports, Profit & Loss, Sales History</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="printReport()" class="btn btn-outline" style="color:#6366f1; border-color:#6366f1;">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button onclick="exportCurrentReport()" class="btn btn-outline"
+                    style="color:#059669; border-color:#059669;">
+                    <i class="fas fa-file-export"></i> Export CSV
+                </button>
+
+            </div>
+        </div>
+
+        <!-- REPORT TABS -->
+        <div class="report-tabs" style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+            <button class="report-tab active" id="tab-pl" onclick="switchTab('pl')">
+                <i class="fas fa-chart-line"></i> Profit & Loss
+            </button>
+            <button class="report-tab" id="tab-gst" onclick="switchTab('gst')">
+                <i class="fas fa-file-invoice"></i> GST Report
+            </button>
+            <button class="report-tab" id="tab-sales" onclick="switchTab('sales')">
+                <i class="fas fa-chart-pie"></i> Sales Report
+            </button>
+            <button class="report-tab" id="tab-purchase" onclick="switchTab('purchase')">
+                <i class="fas fa-cart-arrow-down"></i> Purchase Report
+            </button>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="card filter-bar" style="margin-bottom:1.5rem; padding:1.25rem 1.5rem;">
+            <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <label style="font-size:0.85rem; font-weight:600; white-space:nowrap;">From</label>
+                    <input type="date" id="fromDate" style="width:155px; margin-bottom:0; font-size:0.875rem;">
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <label style="font-size:0.85rem; font-weight:600; white-space:nowrap;">To</label>
+                    <input type="date" id="toDate" style="width:155px; margin-bottom:0; font-size:0.875rem;">
+                </div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:0.5rem 0.875rem;"
+                        onclick="setRange('today')">Today</button>
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:0.5rem 0.875rem;"
+                        onclick="setRange('week')">This Week</button>
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:0.5rem 0.875rem;"
+                        onclick="setRange('month')">This Month</button>
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:0.5rem 0.875rem;"
+                        onclick="setRange('quarter')">This Quarter</button>
+                    <button class="btn btn-outline" style="font-size:0.8rem; padding:0.5rem 0.875rem;"
+                        onclick="setRange('year')">This Year</button>
+                </div>
+                <button class="btn btn-primary" onclick="loadCurrentReport()" style="padding:0.5rem 1.25rem;">
+                    <i class="fas fa-sync"></i> Apply
+                </button>
+            </div>
+        </div>
+
+        <!-- P&L REPORT -->
+        <div id="report-pl">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; flex-wrap:wrap;">
+
+                <!-- P&L Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 style="font-size:1rem;">Profit & Loss Summary</h2>
+                        <span id="plPeriodLabel" style="font-size:0.75rem; color:var(--text-muted);"></span>
+                    </div>
+
+                    <div class="pl-row">
+                        <span style="color:var(--text-muted);">Gross Revenue</span>
+                        <span id="plRevenue" style="font-weight:600; color:var(--primary);">₹0</span>
+                    </div>
+                    <div class="pl-row">
+                        <span style="color:var(--text-muted);">GST Collected</span>
+                        <span id="plGst" style="font-weight:600; color:#6366f1;">₹0</span>
+                    </div>
+                    <div class="pl-row">
+                        <span style="color:var(--text-muted);">Gross Profit (Sales - COGS)</span>
+                        <span id="plGrossProfit" style="font-weight:600; color:var(--secondary);">₹0</span>
+                    </div>
+                    <div class="pl-row">
+                        <span style="color:var(--text-muted);">Total Purchases</span>
+                        <span id="plPurchases" style="font-weight:600; color:#f59e0b;">₹0</span>
+                    </div>
+                    <div class="pl-row">
+                        <span style="color:var(--text-muted);">Total Expenses</span>
+                        <span id="plExpenses" style="font-weight:600; color:var(--danger);">₹0</span>
+                    </div>
+                    <div class="pl-row total" id="plNetRow">
+                        <span>Net Profit</span>
+                        <span id="plNet" style="color:var(--secondary);">₹0</span>
+                    </div>
+                </div>
+
+                <!-- P&L Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 style="font-size:1rem;">Visual Breakdown</h2>
+                    </div>
+                    <canvas id="plChart" height="260"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- GST REPORT -->
+        <div id="report-gst" style="display:none;">
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="card-header" style="padding:1.25rem 1.5rem; margin-bottom:0; background:#f9fafb;">
+                    <h2 style="font-size:1rem;">GST Tax Report (GSTR-1 Format)</h2>
+                    <div style="display:flex; gap:1rem;">
+                        <div style="text-align:center;">
+                            <div style="font-size:0.7rem; color:var(--text-muted);">Taxable Amount</div>
+                            <div id="gstTaxable" style="font-weight:700; color:var(--primary); font-size:1rem;">₹0</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:0.7rem; color:var(--text-muted);">Total GST</div>
+                            <div id="gstTotal" style="font-weight:700; color:#6366f1; font-size:1rem;">₹0</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:0.7rem; color:var(--text-muted);">Total Invoice Value</div>
+                            <div id="gstInvoiceTotal" style="font-weight:700; color:var(--secondary); font-size:1rem;">
+                                ₹0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice No.</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>GSTIN</th>
+                                <th>Taxable Amt</th>
+                                <th>GST Amt</th>
+                                <th>Invoice Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gstTable">
+                            <tr>
+                                <td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">Apply
+                                    filter to load GST report</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SALES REPORT -->
+        <div id="report-sales" style="display:none;">
+            
+            <!-- Advanced Filters & Sub-tabs -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                <div class="report-tabs" style="margin-bottom:0; flex:1; border:none;">
+                    <button class="report-tab active" id="subtab-invoice" onclick="switchSalesSubTab('invoice')" style="padding:0.4rem 0.8rem;">Invoices</button>
+                    <button class="report-tab" id="subtab-customer" onclick="switchSalesSubTab('customer')" style="padding:0.4rem 0.8rem;">Customer-Wise</button>
+                    <button class="report-tab" id="subtab-product" onclick="switchSalesSubTab('product')" style="padding:0.4rem 0.8rem;">Product-Wise</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem; background:#fff; padding:0.2rem 0.8rem; border-radius:8px; border:1px solid var(--border);">
+                    <i class="fas fa-filter" style="color:var(--text-muted); font-size:0.8rem;"></i>
+                    <select id="paymentStatusFilter" onchange="renderSalesViews()" style="border:none; outline:none; font-size:0.85rem; font-weight:600; background:transparent; padding:0.3rem;">
+                        <option value="all">All Payments</option>
+                        <option value="paid">Paid (Cash/Bank)</option>
+                        <option value="credit">Unpaid (Udhaar)</option>
+                        <option value="part">Partial</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+                <div class="card" style="padding:1.25rem; border-left:4px solid var(--primary);">
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Total Sales</div>
+                    <div id="salesTotalAmt" style="font-size:1.5rem; font-weight:700; color:#0f172a; margin-top:0.25rem;">₹0</div>
+                    <div id="salesCount" style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">0 Invoices</div>
+                </div>
+                <div class="card" style="padding:1.25rem; border-left:4px solid #10b981;">
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Total Collected</div>
+                    <div id="salesCashAmt" style="font-size:1.5rem; font-weight:700; color:#10b981; margin-top:0.25rem;">₹0</div>
+                </div>
+                <div class="card" style="padding:1.25rem; border-left:4px solid #f59e0b;">
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Total Credit (Udhaar)</div>
+                    <div id="salesCreditAmt" style="font-size:1.5rem; font-weight:700; color:#d97706; margin-top:0.25rem;">₹0</div>
+                </div>
+            </div>
+
+            <!-- Invoices Table Container -->
+            <div id="sales-view-invoice" class="card" style="padding:0; overflow:hidden;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice No.</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Items</th>
+                                <th style="text-align:right;">Total Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesHistoryTable">
+                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">Apply filter to load sales</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer-Wise Table Container -->
+            <div id="sales-view-customer" class="card" style="padding:0; overflow:hidden; display:none;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Phone</th>
+                                <th>Invoices</th>
+                                <th style="text-align:right;">Total Collected</th>
+                                <th style="text-align:right;">Total Credit</th>
+                                <th style="text-align:right;">Total Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesCustomerTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Product-Wise Table Container -->
+            <div id="sales-view-product" class="card" style="padding:0; overflow:hidden; display:none;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Qty Sold</th>
+                                <th style="text-align:right;">Avg Selling Price</th>
+                                <th style="text-align:right;">Total Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesProductTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PURCHASE REPORT -->
+        <div id="report-purchase" style="display:none;">
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="card-header" style="padding:1.25rem 1.5rem; margin-bottom:0; background:#f9fafb;">
+                    <h2 style="font-size:1rem;">Purchase Report</h2>
+                    <div style="display:flex; gap:1rem;">
+                        <div style="text-align:center;">
+                            <div style="font-size:0.7rem; color:var(--text-muted);">Total Purchases</div>
+                            <div id="purchaseTotalAmt" style="font-weight:700; color:#f59e0b; font-size:1rem;">₹0</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:0.7rem; color:var(--text-muted);">Bills</div>
+                            <div id="purchaseCount" style="font-weight:700; color:var(--secondary); font-size:1rem;">0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice No.</th>
+                                <th>Supplier</th>
+                                <th>Date</th>
+                                <th>GST</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseReportTable">
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">Apply
+                                    filter to load purchase report</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast"></div>
+    <script src="sidebar.js"></script>
+    <script>
+        let currentTab = 'pl';
+        let plChart = null;
+        let currentGSTData = [];
+        let currentSalesData = []; // To keep existing reference intact for other parts if any
+        let currentSalesRaw = [];
+        let currentSalesInvoices = [];
+        let currentSalesCustomer = [];
+        let currentSalesProduct = [];
+        let currentSalesSubTab = 'invoice';
+        let currentPurchaseData = [];
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = `toast-${type}`;
+            t.style.display = "block";
+            setTimeout(() => t.style.display = "none", 3000);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['pl', 'gst', 'sales', 'purchase'].forEach(t => {
+                document.getElementById(`report-${t}`).style.display = t === tab ? 'block' : 'none';
+                document.getElementById(`tab-${t}`).className = `report-tab${t === tab ? ' active' : ''}`;
+            });
+            loadCurrentReport();
+        }
+
+        function setRange(range) {
+            const now = new Date();
+            let from, to;
+            const fmt = d => d.toISOString().slice(0, 10);
+
+            switch (range) {
+                case 'today':
+                    from = to = fmt(now); break;
+                case 'week': {
+                    const day = now.getDay();
+                    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+                    from = fmt(new Date(now.setDate(diff)));
+                    to = fmt(new Date());
+                    break;
+                }
+                case 'month':
+                    from = fmt(new Date(now.getFullYear(), now.getMonth(), 1));
+                    to = fmt(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+                    break;
+                case 'quarter': {
+                    const q = Math.floor(now.getMonth() / 3);
+                    from = fmt(new Date(now.getFullYear(), q * 3, 1));
+                    to = fmt(new Date(now.getFullYear(), q * 3 + 3, 0));
+                    break;
+                }
+                case 'year':
+                    from = `${now.getFullYear()}-01-01`;
+                    to = `${now.getFullYear()}-12-31`;
+                    break;
+            }
+            document.getElementById("fromDate").value = from;
+            document.getElementById("toDate").value = to;
+            loadCurrentReport();
+        }
+
+        function loadCurrentReport() {
+            switch (currentTab) {
+                case 'pl': loadPL(); break;
+                case 'gst': loadGST(); break;
+                case 'sales': loadSalesHistory(); break;
+                case 'purchase': loadPurchaseReport(); break;
+            }
+        }
+
+        async function loadPL() {
+            const from = document.getElementById("fromDate").value;
+            const to = document.getElementById("toDate").value;
+            if (!from || !to) { showToast("Please select date range", "error"); return; }
+            try {
+                const res = await fetch(window.apiUrl("/profit-loss", { from, to }));
+                const data = await res.json();
+
+                document.getElementById("plRevenue").innerText = `₹${Math.round(data.revenue || 0).toLocaleString('en-IN')}`;
+                document.getElementById("plGst").innerText = `₹${Math.round(data.gst_collected || 0).toLocaleString('en-IN')}`;
+                document.getElementById("plGrossProfit").innerText = `₹${Math.round(data.gross_profit || 0).toLocaleString('en-IN')}`;
+                document.getElementById("plPurchases").innerText = `₹${Math.round(data.total_purchases || 0).toLocaleString('en-IN')}`;
+                document.getElementById("plExpenses").innerText = `₹${Math.round(data.total_expenses || 0).toLocaleString('en-IN')}`;
+
+                const net = data.net_profit || 0;
+                const netEl = document.getElementById("plNet");
+                const netRow = document.getElementById("plNetRow");
+                netEl.innerText = `₹${Math.round(net).toLocaleString('en-IN')}`;
+                netEl.style.color = net >= 0 ? 'var(--secondary)' : 'var(--danger)';
+                netRow.className = `pl-row ${net >= 0 ? 'total' : 'loss'}`;
+
+                document.getElementById("plPeriodLabel").innerText = `${from} to ${to}`;
+
+                // Chart
+                buildPLChart(data);
+            } catch (e) { showToast("Failed to load P&L âŒ", "error"); }
+        }
+
+        function buildPLChart(data) {
+            const ctx = document.getElementById("plChart").getContext("2d");
+            if (plChart) plChart.destroy();
+            plChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Gross Profit', 'Purchases', 'Expenses', 'Net Profit'],
+                    datasets: [{
+                        data: [
+                            Math.round(data.revenue || 0),
+                            Math.round(data.gross_profit || 0),
+                            Math.round(data.total_purchases || 0),
+                            Math.round(data.total_expenses || 0),
+                            Math.round(data.net_profit || 0)
+                        ],
+                        backgroundColor: [
+                            'rgba(99,102,241,0.7)',
+                            'rgba(16,185,129,0.7)',
+                            'rgba(245,158,11,0.7)',
+                            'rgba(239,68,68,0.7)',
+                            data.net_profit >= 0 ? 'rgba(16,185,129,0.9)' : 'rgba(239,68,68,0.9)'
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ` ₹${ctx.raw.toLocaleString('en-IN')}` } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { callback: v => '₹' + v.toLocaleString('en-IN') } }
+                    }
+                }
+            });
+        }
+
+        async function loadGST() {
+            const from = document.getElementById("fromDate").value;
+            const to = document.getElementById("toDate").value;
+            if (!from || !to) { showToast("Please select date range", "error"); return; }
+            try {
+                const res = await fetch(window.apiUrl("/gst-report", { from, to }));
+                currentGSTData = await res.json();
+                const tbody = document.getElementById("gstTable");
+
+                if (!currentGSTData || currentGSTData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">No GST records for selected period</td></tr>`;
+                    document.getElementById("gstTaxable").innerText = "₹0";
+                    document.getElementById("gstTotal").innerText = "₹0";
+                    document.getElementById("gstInvoiceTotal").innerText = "₹0";
+                    return;
+                }
+
+                let totalTaxable = 0, totalGST = 0, totalInvoice = 0;
+                currentGSTData.forEach(r => {
+                    totalTaxable += (r.taxable_amount || 0);
+                    totalGST += (r.gst_amount || 0);
+                    totalInvoice += (r.total_amount || 0);
+                });
+
+                document.getElementById("gstTaxable").innerText = `₹${Math.round(totalTaxable).toLocaleString('en-IN')}`;
+                document.getElementById("gstTotal").innerText = `₹${Math.round(totalGST).toLocaleString('en-IN')}`;
+                document.getElementById("gstInvoiceTotal").innerText = `₹${Math.round(totalInvoice).toLocaleString('en-IN')}`;
+
+                tbody.innerHTML = currentGSTData.map(r => `
+                <tr>
+                    <td><code style="background:#f1f5f9; padding:2px 7px; border-radius:5px; font-size:0.8rem;">${r.invoice_number || '—'}</code></td>
+                    <td style="font-size:0.85rem; color:var(--text-muted);">${new Date(r.date).toLocaleDateString('en-IN')}</td>
+                    <td>${r.customer_name || 'Walk-in'}</td>
+                    <td style="font-size:0.8rem;">${r.customer_gstin || 'URD'}</td>
+                    <td style="font-weight:600;">₹${Math.round(r.taxable_amount || 0).toLocaleString('en-IN')}</td>
+                    <td style="color:#6366f1; font-weight:600;">₹${Math.round(r.gst_amount || 0).toLocaleString('en-IN')}</td>
+                    <td style="font-weight:700; color:var(--primary);">₹${Math.round(r.total_amount || 0).toLocaleString('en-IN')}</td>
+                </tr>
+            `).join("");
+            } catch (e) { showToast("Failed to load GST report âŒ", "error"); }
+        }
+
+        function switchSalesSubTab(tab) {
+            currentSalesSubTab = tab;
+            document.querySelectorAll('#report-sales .report-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`subtab-${tab}`).classList.add('active');
+            
+            document.getElementById('sales-view-invoice').style.display = tab === 'invoice' ? 'block' : 'none';
+            document.getElementById('sales-view-customer').style.display = tab === 'customer' ? 'block' : 'none';
+            document.getElementById('sales-view-product').style.display = tab === 'product' ? 'block' : 'none';
+        }
+
+        async function loadSalesHistory() {
+            const from = document.getElementById("fromDate").value;
+            const to = document.getElementById("toDate").value;
+            if (!from || !to) { showToast("Please select date range", "error"); return; }
+            try {
+                const res = await fetch(window.apiUrl("/sales-advanced-report"));
+                let rawData = await res.json();
+                
+                // Filter by date
+                currentSalesRaw = rawData.filter(r => {
+                    const d = r.date.slice(0, 10);
+                    return d >= from && d <= to;
+                });
+                
+                renderSalesViews();
+            } catch (e) { showToast("Failed to load advanced sales âŒ", "error"); }
+        }
+
+        function renderSalesViews() {
+            const filter = document.getElementById("paymentStatusFilter").value;
+            
+            // 1. Group into unique invoices and apply payment filter
+            let invoiceMap = new Map();
+            currentSalesRaw.forEach(r => {
+                if (!invoiceMap.has(r.sale_id)) {
+                    invoiceMap.set(r.sale_id, {
+                        sale_id: r.sale_id,
+                        invoice_number: r.invoice_number,
+                        date: r.date,
+                        customer_name: r.customer_name,
+                        customer_phone: r.customer_phone,
+                        total_amount: r.total_amount || 0,
+                        gst_amount: r.gst_amount || 0,
+                        payment_mode: r.payment_mode || 'cash',
+                        payment_status: r.payment_status || 'paid',
+                        items_count: 0
+                    });
+                }
+                if (r.product_id) invoiceMap.get(r.sale_id).items_count += 1;
+            });
+            
+            currentSalesInvoices = Array.from(invoiceMap.values());
+            
+            if (filter !== 'all') {
+                currentSalesInvoices = currentSalesInvoices.filter(i => {
+                    if (filter === 'paid') return i.payment_status === 'paid' || i.payment_mode === 'cash';
+                    if (filter === 'credit') return i.payment_status === 'unpaid' || i.payment_mode === 'credit';
+                    if (filter === 'part') return i.payment_status === 'partial' || i.payment_mode === 'part';
+                    return true;
+                });
+            }
+            // For export mapping
+            currentSalesData = currentSalesInvoices; 
+
+            // Calculate Summaries
+            let totalSales = 0, totalCash = 0, totalCredit = 0;
+            currentSalesInvoices.forEach(i => {
+                totalSales += i.total_amount;
+                if (i.payment_mode === 'cash') totalCash += i.total_amount;
+                else if (i.payment_mode === 'credit') totalCredit += i.total_amount;
+                else if (i.payment_mode === 'part') {
+                    // For simplicity if we don't have exact part cash, we treat full as total for now, or you can adjust
+                    // Here we will just estimate, but ideally backend should provide cash_collected.
+                    // For now, we'll categorize part as credit mostly if unpaid, or 50/50.
+                    totalCredit += i.total_amount; // fallback
+                }
+            });
+
+            document.getElementById("salesTotalAmt").innerText = `₹${Math.round(totalSales).toLocaleString('en-IN')}`;
+            document.getElementById("salesCount").innerText = `${currentSalesInvoices.length} Invoices`;
+            document.getElementById("salesCashAmt").innerText = `₹${Math.round(totalCash).toLocaleString('en-IN')}`;
+            document.getElementById("salesCreditAmt").innerText = `₹${Math.round(totalCredit).toLocaleString('en-IN')}`;
+
+            // Render Invoices Table
+            const tbodyInv = document.getElementById("salesHistoryTable");
+            if (!currentSalesInvoices.length) {
+                tbodyInv.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">No sales match criteria</td></tr>`;
+            } else {
+                tbodyInv.innerHTML = currentSalesInvoices.map(s => {
+                    let statusHtml = s.payment_mode === 'cash' ? '<span style="color:#10b981; font-weight:600;">Paid</span>' : 
+                                     s.payment_mode === 'credit' ? '<span style="color:#ef4444; font-weight:600;">Credit</span>' : 
+                                     '<span style="color:#f59e0b; font-weight:600;">Part</span>';
+                    return `
+                    <tr>
+                        <td><code style="background:#f1f5f9; padding:2px 7px; border-radius:5px; font-size:0.8rem;">${s.invoice_number || '—'}</code></td>
+                        <td style="font-size:0.85rem; color:var(--text-muted);">${new Date(s.date).toLocaleDateString('en-IN')}</td>
+                        <td style="font-weight:600;">${s.customer_name || 'Walk-in'}</td>
+                        <td style="font-size:0.85rem;">${statusHtml}</td>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${s.items_count} items</td>
+                        <td style="font-weight:700; color:var(--primary); text-align:right;">₹${Math.round(s.total_amount || 0).toLocaleString('en-IN')}</td>
+                    </tr>`;
+                }).join("");
+            }
+
+            // 2. Customer Wise
+            let custMap = {};
+            currentSalesInvoices.forEach(i => {
+                let name = i.customer_name || 'Walk-in';
+                if (!custMap[name]) custMap[name] = { name, phone: i.customer_phone || '—', invoices: 0, cash: 0, credit: 0, total: 0 };
+                custMap[name].invoices += 1;
+                custMap[name].total += i.total_amount;
+                if (i.payment_mode === 'cash') custMap[name].cash += i.total_amount;
+                else custMap[name].credit += i.total_amount;
+            });
+            currentSalesCustomer = Object.values(custMap).sort((a,b) => b.total - a.total);
+            const tbodyCust = document.getElementById("salesCustomerTable");
+            tbodyCust.innerHTML = currentSalesCustomer.map(c => `
+                <tr>
+                    <td style="font-weight:600;">${c.name}</td>
+                    <td style="color:var(--text-muted);">${c.phone}</td>
+                    <td>${c.invoices}</td>
+                    <td style="text-align:right; color:#10b981;">₹${Math.round(c.cash).toLocaleString('en-IN')}</td>
+                    <td style="text-align:right; color:#ef4444;">₹${Math.round(c.credit).toLocaleString('en-IN')}</td>
+                    <td style="text-align:right; font-weight:bold;">₹${Math.round(c.total).toLocaleString('en-IN')}</td>
+                </tr>
+            `).join("");
+
+            // 3. Product Wise
+            // Only include products from invoices that pass the current filter!
+            const validSaleIds = new Set(currentSalesInvoices.map(i => i.sale_id));
+            let prodMap = {};
+            currentSalesRaw.forEach(r => {
+                if (validSaleIds.has(r.sale_id) && r.product_id) {
+                    let name = r.product_name || 'Unknown Item';
+                    if (!prodMap[name]) prodMap[name] = { name, qty: 0, revenue: 0 };
+                    prodMap[name].qty += (r.quantity || 0);
+                    prodMap[name].revenue += ((r.selling_price || 0) * (r.quantity || 0));
+                }
+            });
+            currentSalesProduct = Object.values(prodMap).sort((a,b) => b.revenue - a.revenue);
+            const tbodyProd = document.getElementById("salesProductTable");
+            tbodyProd.innerHTML = currentSalesProduct.map(p => `
+                <tr>
+                    <td style="font-weight:600;">${p.name}</td>
+                    <td>${p.qty}</td>
+                    <td style="text-align:right;">₹${Math.round(p.qty ? p.revenue/p.qty : 0).toLocaleString('en-IN')}</td>
+                    <td style="text-align:right; font-weight:bold; color:var(--primary);">₹${Math.round(p.revenue).toLocaleString('en-IN')}</td>
+                </tr>
+            `).join("");
+        }
+
+        async function loadPurchaseReport() {
+            const from = document.getElementById("fromDate").value;
+            const to = document.getElementById("toDate").value;
+            if (!from || !to) { showToast("Please select date range", "error"); return; }
+            try {
+                const res = await fetch(window.apiUrl("/purchases"));
+                let purchases = await res.json();
+                currentPurchaseData = purchases.filter(p => {
+                    const d = p.date.slice(0, 10);
+                    return d >= from && d <= to;
+                });
+
+                const tbody = document.getElementById("purchaseReportTable");
+                const total = currentPurchaseData.reduce((s, x) => s + (x.total_amount || 0), 0);
+                document.getElementById("purchaseTotalAmt").innerText = `₹${Math.round(total).toLocaleString('en-IN')}`;
+                document.getElementById("purchaseCount").innerText = currentPurchaseData.length;
+
+                if (!currentPurchaseData.length) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">No purchases for selected period</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = currentPurchaseData.map(p => `
+                <tr>
+                    <td><code style="background:#fef3c7; padding:2px 7px; border-radius:5px; font-size:0.8rem; color:#92400e;">${p.invoice_number || '—'}</code></td>
+                    <td style="font-weight:600; color:#f59e0b;">${p.supplier_name || '—'}</td>
+                    <td style="font-size:0.85rem; color:var(--text-muted);">${new Date(p.date).toLocaleDateString('en-IN')}</td>
+                    <td style="color:#6366f1;">₹${Math.round(p.gst_amount || 0).toLocaleString('en-IN')}</td>
+                    <td style="font-weight:700;">₹${Math.round(p.total_amount || 0).toLocaleString('en-IN')}</td>
+                </tr>
+            `).join("");
+            } catch (e) { showToast("Failed to load purchases âŒ", "error"); }
+        }
+
+        function exportCurrentReport() {
+            let data = [], headers = [], filename = '';
+            switch (currentTab) {
+                case 'gst':
+                    headers = ['invoice_number', 'date', 'customer_name', 'customer_gstin', 'taxable_amount', 'gst_amount', 'total_amount'];
+                    data = currentGSTData;
+                    filename = 'gst_report';
+                    break;
+                case 'sales':
+                    if (currentSalesSubTab === 'invoice') {
+                        headers = ['invoice_number', 'date', 'customer_name', 'customer_phone', 'payment_mode', 'total_amount'];
+                        data = currentSalesInvoices;
+                        filename = 'sales_invoices';
+                    } else if (currentSalesSubTab === 'customer') {
+                        headers = ['name', 'phone', 'invoices', 'cash', 'credit', 'total'];
+                        data = currentSalesCustomer;
+                        filename = 'sales_customer_wise';
+                    } else {
+                        headers = ['name', 'qty', 'revenue'];
+                        data = currentSalesProduct;
+                        filename = 'sales_product_wise';
+                    }
+                    break;
+                case 'purchase':
+                    headers = ['invoice_number', 'supplier_name', 'date', 'total_amount', 'gst_amount'];
+                    data = currentPurchaseData;
+                    filename = 'purchase_report';
+                    break;
+                default:
+                    showToast("Switch to GST, Sales or Purchase tab to export", "error");
+                    return;
+            }
+            if (!data || data.length === 0) { showToast("No data to export âŒ", "error"); return; }
+            const rows = data.map(r => headers.map(h => `"${r[h] || ''}"`).join(","));
+            const csv = [headers.join(","), ...rows].join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${filename}_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast("Exported ✅");
+        }
+
+        function printReport() { window.print(); }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setRange('month');
+        });
+
+        window.switchTab = switchTab;
+        window.setRange = setRange;
+        window.loadCurrentReport = loadCurrentReport;
+        window.exportCurrentReport = exportCurrentReport;
+        window.printReport = printReport;
+    </script>
+</body>
+
+</html>

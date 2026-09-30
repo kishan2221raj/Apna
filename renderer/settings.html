@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Settings | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+    <style>
+        .settings-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .settings-card h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:0.25rem;">
+                    <button onclick="window.location.href='index.html'" class="btn btn-outline small"
+                        style="padding:8px; border-radius:10px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size:1.5rem;">Settings</h1>
+                </div>
+                <p>Manage Shop Profile and Bank Details</p>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3><i class="fas fa-store"></i> Shop Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Shop Name <span style="color:red;">*</span></label>
+                    <input id="shopName" placeholder="Enter shop name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input id="shopPhone" placeholder="Enter contact number">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Address</label>
+                    <input id="shopAddress" placeholder="Full shop address">
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <input id="shopState" list="stateList" placeholder="e.g. Maharashtra">
+                </div>
+                <div class="form-group">
+                    <label>State Code</label>
+                    <input id="shopStateCode" placeholder="e.g. 27">
+                </div>
+                <div class="form-group">
+                    <label>GSTIN</label>
+                    <input id="shopGstin" placeholder="e.g. 27AAAAA0000A1Z5" style="text-transform:uppercase;">
+                </div>
+                <div class="form-group">
+                    <label>Invoice Prefix</label>
+                    <input id="invoicePrefix" placeholder="e.g. APNA" style="text-transform:uppercase;">
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3><i class="fas fa-university"></i> Bank Details (Invoice)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Bank Name</label>
+                    <input id="bankName" placeholder="e.g. HDFC Bank">
+                </div>
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input id="accountNumber" placeholder="Enter A/c No">
+                </div>
+                <div class="form-group">
+                    <label>IFSC Code</label>
+                    <input id="ifscCode" placeholder="Enter IFSC" style="text-transform:uppercase;">
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3><i class="fas fa-shield-alt"></i> Security</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="oldPassword" placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password">
+                </div>
+                <div class="form-group" style="display:flex; align-items:flex-end;">
+                    <button onclick="changePassword()" class="btn btn-primary" style="width:100%; padding: 0.6rem;">
+                        Update Password
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:1rem; margin-bottom: 3rem;">
+            <button onclick="window.location.reload()" class="btn btn-outline">Discard Changes</button>
+            <button onclick="saveSettings()" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size:1.1rem;">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+
+    </div><!-- end main-content -->
+
+    <div id="toast"></div>
+
+    <datalist id="stateList">
+        <option value="Jammu & Kashmir">
+        <option value="Himachal Pradesh">
+        <option value="Punjab">
+        <option value="Chandigarh">
+        <option value="Uttarakhand">
+        <option value="Haryana">
+        <option value="Delhi">
+        <option value="Rajasthan">
+        <option value="Uttar Pradesh">
+        <option value="Bihar">
+        <option value="Sikkim">
+        <option value="Arunachal Pradesh">
+        <option value="Nagaland">
+        <option value="Manipur">
+        <option value="Mizoram">
+        <option value="Tripura">
+        <option value="Meghalaya">
+        <option value="Assam">
+        <option value="West Bengal">
+        <option value="Jharkhand">
+        <option value="Odisha">
+        <option value="Chhattisgarh">
+        <option value="Madhya Pradesh">
+        <option value="Gujarat">
+        <option value="Maharashtra">
+        <option value="Karnataka">
+        <option value="Goa">
+        <option value="Kerala">
+        <option value="Tamil Nadu">
+        <option value="Puducherry">
+        <option value="Telangana">
+        <option value="Andhra Pradesh">
+        <option value="Ladakh">
+    </datalist>
+
+    <script src="sidebar.js"></script>
+    <script>
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = `toast-${type}`;
+            t.style.display = "block";
+            setTimeout(() => t.style.display = "none", 3000);
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch(window.apiUrl("/shop-info"));
+                const data = await res.json();
+                if (data.name) {
+                    document.getElementById("shopName").value = data.name || "";
+                    document.getElementById("shopPhone").value = data.phone || "";
+                    document.getElementById("shopAddress").value = data.address || "";
+                    document.getElementById("shopState").value = data.state || "";
+                    document.getElementById("shopStateCode").value = data.state_code || "";
+                    document.getElementById("shopGstin").value = data.gstin || "";
+                    document.getElementById("bankName").value = data.bank_name || "";
+                    document.getElementById("accountNumber").value = data.account_number || "";
+                    document.getElementById("ifscCode").value = data.ifsc_code || "";
+                    document.getElementById("invoicePrefix").value = data.invoice_prefix || "";
+                }
+            } catch (e) {
+                console.error("Error loading settings:", e);
+                showToast("Failed to load settings âŒ", "error");
+            }
+        }
+
+        async function saveSettings() {
+            const name = document.getElementById("shopName").value.trim();
+            if (!name) return showToast("Shop Name is required âŒ", "error");
+
+            const data = {
+                shop_id: window.SHOP_ID || 1,
+                name: name,
+                phone: document.getElementById("shopPhone").value.trim(),
+                address: document.getElementById("shopAddress").value.trim(),
+                state: document.getElementById("shopState").value.trim(),
+                state_code: document.getElementById("shopStateCode").value.trim(),
+                gstin: document.getElementById("shopGstin").value.trim(),
+                bank_name: document.getElementById("bankName").value.trim(),
+                account_number: document.getElementById("accountNumber").value.trim(),
+                ifsc_code: document.getElementById("ifscCode").value.trim(),
+                invoice_prefix: document.getElementById("invoicePrefix").value.trim().toUpperCase()
+            };
+
+            try {
+                const res = await fetch(window.API + "/update-shop-info", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    showToast("Settings saved successfully ✅");
+                    
+                    // Also update the sidebar header immediately if we have access to it
+                    const shopNameEl = document.getElementById("shopHeaderName");
+                    if (shopNameEl) shopNameEl.innerText = data.name;
+                } else {
+                    showToast("Failed to save settings âŒ", "error");
+                }
+            } catch (e) {
+                console.error("Error saving settings:", e);
+                showToast("Connection error âŒ", "error");
+            }
+        }
+
+        async function changePassword() {
+            const oldPassword = document.getElementById("oldPassword").value.trim();
+            const newPassword = document.getElementById("newPassword").value.trim();
+            
+            if (!oldPassword || !newPassword) {
+                return showToast("Please enter both old and new passwords âŒ", "error");
+            }
+            if (newPassword.length < 6) {
+                return showToast("New password must be at least 6 characters âŒ", "error");
+            }
+
+            const username = sessionStorage.getItem("currentUser");
+            if (!username) return showToast("Not logged in âŒ", "error");
+
+            try {
+                const res = await fetch(window.API + "/change-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, oldPassword, newPassword })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    showToast("Password updated successfully ✅");
+                    document.getElementById("oldPassword").value = "";
+                    document.getElementById("newPassword").value = "";
+                } else {
+                    showToast(data.message || "Failed to update password âŒ", "error");
+                }
+            } catch (e) {
+                console.error("Error changing password:", e);
+                showToast("Connection error âŒ", "error");
+            }
+        }
+
+        // State auto-fill code snippet (same logic used elsewhere)
+        const stateCodeMap = {
+            "Jammu & Kashmir": "01", "Himachal Pradesh": "02", "Punjab": "03", "Chandigarh": "04",
+            "Uttarakhand": "05", "Haryana": "06", "Delhi": "07", "Rajasthan": "08", "Uttar Pradesh": "09",
+            "Bihar": "10", "Sikkim": "11", "Arunachal Pradesh": "12", "Nagaland": "13", "Manipur": "14",
+            "Mizoram": "15", "Tripura": "16", "Meghalaya": "17", "Assam": "18", "West Bengal": "19",
+            "Jharkhand": "20", "Odisha": "21", "Chhattisgarh": "22", "Madhya Pradesh": "23",
+            "Gujarat": "24", "Maharashtra": "27", "Karnataka": "29", "Goa": "30", "Kerala": "32",
+            "Tamil Nadu": "33", "Puducherry": "34", "Telangana": "36", "Andhra Pradesh": "37", "Ladakh": "38"
+        };
+        document.getElementById("shopState").addEventListener("change", function () {
+            const v = this.value.trim();
+            if (stateCodeMap[v]) document.getElementById("shopStateCode").value = stateCodeMap[v];
+        });
+
+        document.addEventListener("DOMContentLoaded", loadSettings);
+    </script>
+</body>
+
+</html>
+

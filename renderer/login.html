@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login - APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+    <link href="libs/fonts/outfit.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pro: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+            --shop1: #6366f1;
+            --shop2: #10b981;
+        }
+
+        body {
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            font-family: 'Outfit', sans-serif;
+            background-color: white;
+            overflow: hidden;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Left Branding */
+        .brand-section {
+            flex: 1;
+            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)),
+                url('professional_login_bg_1776503728951.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
+            color: white;
+            position: relative;
+        }
+
+        @media (max-width: 900px) {
+            .brand-section {
+                display: none;
+            }
+        }
+
+        .brand-section h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .brand-section p {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            max-width: 480px;
+            line-height: 1.6;
+        }
+
+        .brand-feature {
+            margin-top: 4rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            color: #60a5fa;
+        }
+
+        /* Right Form */
+        .form-section {
+            width: 550px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 2rem 70px;
+            position: relative;
+            overflow-y: auto;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Vertically center content inside scrollable container */
+        .form-inner {
+            margin: auto 0;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        @media (max-width: 1100px) {
+            .form-section {
+                width: 480px;
+                padding: 2rem 50px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .form-section {
+                width: 100%;
+                padding: 2rem 32px;
+            }
+        }
+
+        .form-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .form-header h1 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .form-header p {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Shop Selector */
+        .shop-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .shop-btn {
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-light);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shop-btn:hover {
+            border-color: var(--primary-pro);
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+
+        .shop-btn.active-shop1 {
+            border-color: var(--shop1);
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
+        }
+
+        .shop-btn.active-shop2 {
+            border-color: var(--shop2);
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+        }
+
+        .shop-btn .shop-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.6rem;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .shop1-icon {
+            background: var(--shop1);
+        }
+
+        .shop2-icon {
+            background: var(--shop2);
+        }
+
+        .shop-btn h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .shop-btn small {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .shop-btn .check-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: white;
+        }
+
+        .active-shop1 .check-badge {
+            background: var(--shop1);
+            display: flex;
+        }
+
+        .active-shop2 .check-badge {
+            background: var(--shop2);
+            display: flex;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.6rem;
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-container i:not(.password-toggle) {
+            position: absolute;
+            left: 15px;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.875rem 45px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: var(--bg-light);
+            box-sizing: border-box;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary-pro);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 5px;
+            z-index: 5;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: var(--text-dark);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.75rem 0 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .forgot-link {
+            color: var(--primary-pro);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            background: var(--primary-pro);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.99);
+        }
+
+        .btn-submit.shop1-btn {
+            background: var(--shop1);
+        }
+
+        .btn-submit.shop1-btn:hover {
+            background: #4f46e5;
+        }
+
+        .btn-submit.shop2-btn {
+            background: var(--shop2);
+        }
+
+        .btn-submit.shop2-btn:hover {
+            background: #059669;
+        }
+
+        .error-box {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #ef4444;
+            padding: 0.875rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 36px;
+            border-radius: 20px;
+            width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .dynamic-content {
+            min-height: 180px;
+            transition: opacity 0.5s ease;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+
+        <!-- Left Branding -->
+        <div class="brand-section">
+            <div style="margin-bottom: auto;">
+                <div class="logo-box" style="background:white;"><img src="logo.png" alt="Logo"></div>
+            </div>
+            <div class="dynamic-content" id="dynamicBranding">
+                <h2 id="dynamicTitle">Empower Your Enterprise</h2>
+                <p id="dynamicDesc">Streamline your business operations with our integrated ERP solution. Manage
+                    billing, inventory, and analytics in one place.</p>
+                <div class="brand-feature">
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <strong>Fast Billing</strong>
+                        <small style="opacity:0.7;">GST compliant invoices</small>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-boxes"></i>
+                        <strong>Inventory</strong>
+                        <small style="opacity:0.7;">Real-time stock tracking</small>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <strong>Analytics</strong>
+                        <small style="opacity:0.7;">Data driven insights</small>
+                    </div>
+                </div>
+            </div>
+            <div style="position:absolute; bottom:28px; left:80px; font-size:0.8rem; opacity:0.45;">
+                © 2026 APNA GROUP. All rights reserved.
+            </div>
+        </div>
+
+        <!-- Right Form -->
+        <div class="form-section">
+            <div class="form-inner">
+            <div class="form-header">
+                <div style="display:flex; align-items:center; gap:14px; margin-bottom:0.5rem;">
+                    <div class="logo-box" style="margin-bottom:0; flex-shrink:0;"><img src="logo.png" alt="Logo"></div>
+                    <h1 style="margin:0;">Welcome Back</h1>
+                </div>
+                <p style="margin-top:0.4rem;">Select your shop and sign in to continue.</p>
+            </div>
+
+            <!-- Shop Selector -->
+            <div style="margin-bottom: 1rem;">
+                <label
+                    style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-dark); margin-bottom:0.6rem;">
+                    Select Shop
+                </label>
+                <div class="shop-selector">
+                    <div class="shop-btn active-shop1" id="shopBtn1" onclick="selectShop(1)">
+                        <div class="check-badge"><i class="fas fa-check"></i></div>
+                        <div class="shop-icon shop1-icon"><i class="fas fa-store"></i></div>
+                        <h4>Apna Enterprises</h4>
+                        <small>Shop 1</small>
+                    </div>
+                    <div class="shop-btn" id="shopBtn2" onclick="selectShop(2)">
+                        <div class="check-badge"><i class="fas fa-check"></i></div>
+                        <div class="shop-icon shop2-icon"><i class="fas fa-hammer"></i></div>
+                        <h4>Apna Hardware</h4>
+                        <small>Shop 2</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div class="input-group">
+                <label>Username</label>
+                <div class="input-container">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" class="login-input" placeholder="Enter username">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="input-group">
+                <label>Password</label>
+                <div class="input-container">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" class="login-input" placeholder="••••••••">
+                    <i class="fas fa-eye-slash password-toggle" onclick="togglePassword()"></i>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <span style="color:var(--text-light); font-size:0.85rem;">
+                    Signing into: <strong id="selectedShopLabel" style="color:var(--shop1);">Apna Enterprises</strong>
+                </span>
+                <a href="#" class="forgot-link" onclick="showResetModal()">Forgot password?</a>
+            </div>
+
+            <button class="btn-submit shop1-btn" id="loginBtn" onclick="handleLogin()">
+                <span id="btnText">Sign In</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+
+            <div id="errorMsg" class="error-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">Invalid credentials</span>
+            </div>
+            </div><!-- end form-inner -->
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div id="resetModal" class="modal">
+        <div class="modal-card">
+            <h2 style="margin-top:0; font-size:1.4rem;">Reset Password</h2>
+            <p style="color:var(--text-light); margin-bottom:1.5rem; font-size:0.9rem;">Use your Master PIN to set a new
+                password.</p>
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="resetUser" class="login-input" placeholder="e.g. ApnaEnterprises"
+                    style="padding-left:16px;">
+            </div>
+            <div class="input-group">
+                <label>Master PIN</label>
+                <input type="password" id="masterPin" class="login-input" placeholder="••••" style="padding-left:16px;">
+            </div>
+            <div class="input-group">
+                <label>New Password</label>
+                <input type="password" id="newPass" class="login-input" placeholder="••••••••"
+                    style="padding-left:16px;">
+            </div>
+            <button class="btn-submit" onclick="handleReset()" style="margin-bottom:0.5rem;">Reset Password</button>
+            <button class="btn-submit" style="background:none; color:var(--text-light); margin-top:0.5rem;"
+                onclick="closeResetModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        if (typeof API === 'undefined') var API = window.location.protocol === 'file:' ? "http://127.0.0.1:4000" : window.location.origin;
+
+        // Redirect if already logged in
+        if (sessionStorage.getItem("isLoggedIn") === "true") {
+            window.location.href = "index.html";
+        }
+
+        let selectedShopId = 1;
+
+        // Reset UI state in case it was cached by the browser
+        window.addEventListener('pageshow', () => {
+            document.getElementById("btnText").style.display = "block";
+            document.getElementById("btnSpinner").style.display = "none";
+            document.getElementById("loginBtn").disabled = false;
+            document.getElementById("password").value = "";
+            document.getElementById("errorMsg").style.display = "none";
+        });
+
+        function selectShop(shopId) {
+            selectedShopId = shopId;
+            const btn1 = document.getElementById("shopBtn1");
+            const btn2 = document.getElementById("shopBtn2");
+            const label = document.getElementById("selectedShopLabel");
+            const loginBtn = document.getElementById("loginBtn");
+
+            // Reset both
+            btn1.className = "shop-btn";
+            btn2.className = "shop-btn";
+
+            if (shopId === 1) {
+                btn1.className = "shop-btn active-shop1";
+                label.innerText = "Apna Enterprises";
+                label.style.color = "var(--shop1)";
+                loginBtn.className = "btn-submit shop1-btn";
+                document.getElementById("username").placeholder = "ApnaEnterprises";
+            } else {
+                btn2.className = "shop-btn active-shop2";
+                label.innerText = "Apna Hardware";
+                label.style.color = "var(--shop2)";
+                loginBtn.className = "btn-submit shop2-btn";
+                document.getElementById("username").placeholder = "ApnaHardware";
+            }
+        }
+
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.querySelector(".password-toggle");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            }
+        }
+
+        async function handleLogin() {
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value.trim();
+            const btn = document.getElementById("loginBtn");
+            const btnText = document.getElementById("btnText");
+            const spinner = document.getElementById("btnSpinner");
+            const error = document.getElementById("errorMsg");
+            const errorText = document.getElementById("errorText");
+
+            error.style.display = "none";
+
+            if (!user || !pass) {
+                error.style.display = "flex";
+                errorText.innerText = "Please fill in all fields";
+                return;
+            }
+
+            btnText.style.display = "none";
+            spinner.style.display = "block";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(API + "/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: user, password: pass, shop_id: selectedShopId })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    sessionStorage.setItem("isLoggedIn", "true");
+                    sessionStorage.setItem("currentUser", user);
+                    sessionStorage.setItem("shop_id", data.shop_id);
+                    sessionStorage.setItem("shopName", selectedShopId === 1 ? "Apna Enterprises" : "Apna Hardware");
+                    window.location.href = "index.html";
+                } else {
+                    throw new Error(data.message || "Invalid credentials");
+                }
+            } catch (err) {
+                btnText.style.display = "block";
+                spinner.style.display = "none";
+                btn.disabled = false;
+                error.style.display = "flex";
+                errorText.innerText = err.message || "Login failed. Please try again.";
+            }
+        }
+
+        function showResetModal() { 
+            document.getElementById("resetModal").style.display = "flex"; 
+            document.getElementById("resetUser").value = selectedShopId === 1 ? "ApnaEnterprises" : "ApnaHardware";
+        }
+        function closeResetModal() { document.getElementById("resetModal").style.display = "none"; }
+
+        async function handleReset() {
+            const user = document.getElementById("resetUser").value.trim();
+            const pin = document.getElementById("masterPin").value.trim();
+            const pass = document.getElementById("newPass").value.trim();
+            if (!user || !pin || !pass) return alert("Please fill all fields");
+            try {
+                const res = await fetch(API + "/reset-password-with-pin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: user, masterPin: pin, newPassword: pass, shop_id: selectedShopId })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert("Password reset successfully! ✅");
+                    closeResetModal();
+                } else {
+                    alert(data.message || "Reset failed ❌");
+                }
+            } catch (err) { alert("Connection Error ❌"); }
+        }
+
+        // Branding cycle
+        const brandingContent = [
+            { title: "Empower Your Enterprise", desc: "Streamline your business operations with our integrated ERP solution. Manage billing, inventory, and analytics in one place." },
+            { title: "Accelerate Your Sales", desc: "Generate GST compliant invoices in seconds and keep track of every rupee with our lightning-fast billing engine." },
+            { title: "Master Your Inventory", desc: "Real-time stock tracking with automated low-stock alerts to ensure you never run out of your best-selling products." },
+            { title: "Unlock Data Insights", desc: "Comprehensive analytics and visual reports to help you understand your business growth and make data-driven decisions." }
+        ];
+
+        let currentBrandIdx = 0;
+        function cycleBranding() {
+            const container = document.getElementById("dynamicBranding");
+            container.classList.add("fade-out");
+            setTimeout(() => {
+                currentBrandIdx = (currentBrandIdx + 1) % brandingContent.length;
+                document.getElementById("dynamicTitle").innerText = brandingContent[currentBrandIdx].title;
+                document.getElementById("dynamicDesc").innerText = brandingContent[currentBrandIdx].desc;
+                container.classList.remove("fade-out");
+                container.classList.add("fade-in");
+            }, 500);
+        }
+        setInterval(cycleBranding, 5000);
+
+        document.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+    </script>
+</body>
+
+</html>

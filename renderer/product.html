@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Inventory | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+    <style>
+        #productFormSection {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom: 0.25rem;">
+                    <button onclick="window.location.href='index.html'" class="btn btn-outline small" style="padding: 8px; border-radius: 10px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size: 1.5rem;">Inventory Management</h1>
+                </div>
+                <p>Track products, prices, and stock levels</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <button onclick="exportInventoryCSV()" class="btn btn-outline" style="color: #059669; border-color: #059669;" title="Export inventory as CSV">
+                    <i class="fas fa-file-export"></i> Export CSV
+                </button>
+                <button onclick="document.getElementById('importCSVInput').click()" class="btn btn-outline" style="color: #7c3aed; border-color: #7c3aed;" title="Import inventory from CSV">
+                    <i class="fas fa-file-import"></i> Import CSV
+                </button>
+                <input type="file" id="importCSVInput" accept=".csv" style="display:none" onchange="importInventoryCSV(this)">
+                <button onclick="window.location.href='index.html'" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
+
+            </div>
+        </div>
+
+        <!-- ADD PRODUCT COLLAPSIBLE -->
+        <div class="card" style="margin-bottom: 2rem; padding: 0; overflow: hidden; border: none; box-shadow: var(--shadow-lg);">
+            <div id="addProductToggle" onclick="toggleProductForm()" 
+                style="padding: 1.25rem 2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, var(--primary), #4f46e5); color: white;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">
+                    <i class="fas fa-plus-circle" style="margin-right: 10px;"></i> Add New Product
+                </h3>
+                <i class="fas fa-chevron-down" id="toggleIcon" style="transition: transform 0.3s;"></i>
+            </div>
+            
+            <div id="productFormSection" style="display: none; padding: 2rem; background: white;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input id="name" placeholder="Enter product name">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input id="category" placeholder="e.g. Electronics">
+                    </div>
+                    <div class="form-group">
+                        <label>HSN/SAC Code</label>
+                        <input id="hsn" placeholder="8-digit code">
+                    </div>
+                    <div class="form-group">
+                        <label>SKU Code <small style="color:var(--text-muted); font-weight:400;">(auto if blank)</small></label>
+                        <input id="sku" placeholder="e.g. WIRE-001" style="text-transform:uppercase;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>Purchase Price</label>
+                        <input id="purchase" placeholder="₹" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\.$/g, '$1')">
+                    </div>
+                    <div class="form-group">
+                        <label>Selling Price <small style="color:var(--text-muted); font-weight:400;">(per unit)</small></label>
+                        <input id="selling" placeholder="₹" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\.$/g, '$1')">
+                    </div>
+                    <div class="form-group">
+                        <label>GST %</label>
+                        <input id="gst" placeholder="18" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\.$/g, '$1')">
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Stock</label>
+                        <input id="qty" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    </div>
+                    <div class="form-group">
+                        <label>Min Stock Warning</label>
+                        <input id="minstock" placeholder="Threshold" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    </div>
+                </div>
+
+                <!-- ── LOOSE / BULK SELLING SECTION ─────────────────────────────── -->
+                <div style="margin-top: 1.5rem; padding: 1.25rem; background: #f8faff; border: 1.5px solid #c7d2fe; border-radius: 12px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:0.75rem;">
+                        <i class="fas fa-weight-hanging" style="color:#6366f1;"></i>
+                        <span style="font-weight:700; color:#4338ca; font-size:0.95rem;">Loose / Bulk Selling</span>
+                        <small style="color:var(--text-muted); font-weight:400;">(optional — for cement bags, screw boxes, loose materials etc.)</small>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1.25rem;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Sell Mode</label>
+                            <select id="sell_mode" onchange="onSellModeChange()" style="width:100%; padding:0.625rem; border:1px solid var(--border); border-radius:10px; font-size:0.9rem;">
+                                <option value="UNIT">Unit Only (default)</option>
+                                <option value="BOTH">Unit + Loose (e.g. Cement Bags + KG)</option>
+                                <option value="LOOSE">Loose / Weight Only (e.g. Sand, Gravel)</option>
+                                <option value="PIECE">Pack-to-Piece (e.g. Screw Box → PCS)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Unit Name <small style="color:var(--text-muted);">(stock counted in)</small></label>
+                            <input id="unit" placeholder="e.g. BAG, BOX, NOS" style="text-transform:uppercase;" value="NOS">
+                        </div>
+                    </div>
+                    <!-- Extra fields shown only when mode != UNIT -->
+                    <div id="looseFieldsWrapper" style="display:none; margin-top:1rem; display:none;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1.25rem;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label id="looseUnitLabel">Loose Unit Name</label>
+                                <input id="loose_unit" placeholder="e.g. KG, PCS, LITRE" style="text-transform:uppercase;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label id="conversionLabel">Conversion Factor</label>
+                                <input id="loose_conversion" type="number" min="0.001" step="any" placeholder="e.g. 50 (1 BAG = 50 KG)">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label id="loosePriceLabel">Loose Selling Price (₹)</label>
+                                <input id="loose_price" type="number" min="0" step="any" placeholder="Price per loose unit">
+                            </div>
+                        </div>
+                        <div id="looseStockInfo" style="display:none; margin-top:0.75rem; padding:0.5rem 0.75rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; font-size:0.82rem; color:#065f46;">
+                            <i class="fas fa-info-circle"></i> <span id="looseStockText"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <button class="btn btn-primary" style="padding: 0.75rem 2rem;" onclick="addProduct()">
+                        <i class="fas fa-save"></i> <span id="saveBtnText">Save Product</span>
+                    </button>
+                    <button id="cancelEdit" class="btn btn-outline" style="padding: 0.75rem 2rem; display: none;" onclick="resetForm()">
+                        Cancel Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCT TABLE SECTION -->
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="card-header" style="padding: 1.5rem; margin-bottom: 0; background: #f9fafb;">
+                <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                    <i class="fas fa-search" style="color: var(--text-muted);"></i>
+                    <input id="search" placeholder="Search by name, SKU, category or HSN..."
+                        style="margin-bottom: 0; border: none; background: transparent; font-size: 1rem; width: 100%;" onkeyup="searchProduct()">
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Details</th>
+                            <th style="text-align: center;">SKU</th>
+                            <th style="text-align: center;">HSN Code</th>
+                            <th>Pricing (P/S)</th>
+                            <th>Current Stock</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleProductForm() {
+            const section = document.getElementById("productFormSection");
+            const icon = document.getElementById("toggleIcon");
+            const isHidden = section.style.display === "none";
+            
+            section.style.display = isHidden ? "block" : "none";
+            icon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+        }
+    </script>
+    </div>
+
+    <!-- ADD STOCK POPUP -->
+    <div id="stockPopup" class="popup">
+        <div class="popup-box">
+            <h2>Add New Stock</h2>
+            <p id="popupProductName" style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.875rem;"></p>
+            <div class="form-group">
+                <label>Quantity Received</label>
+                <input id="popupQty" type="text" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+            <div class="form-group">
+                <label>New Purchase Price (optional)</label>
+                <input id="popupPrice" type="text" placeholder="Leave blank to keep current" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="submitStock()">Update Stock</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="closePopup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BREAK STOCK POPUP -->
+    <div id="breakStockPopup" class="popup">
+        <div class="popup-box" style="border-radius: 16px; border: 1.5px solid var(--primary);">
+            <h2 style="color: var(--primary);"><i class="fas fa-cut"></i> Break Stock to Loose</h2>
+            <p id="breakProductName" style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.875rem; font-weight: 600;"></p>
+            <div id="breakInfoText" style="margin-bottom: 1.5rem; padding: 0.85rem; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; font-size: 0.85rem; color: #5b21b6; line-height: 1.4;"></div>
+            <div class="form-group">
+                <label id="breakQtyLabel" style="font-weight: 600;"></label>
+                <input id="breakQty" type="number" min="0.001" step="any" placeholder="0" style="padding: 0.65rem; border-radius: 10px;">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-primary" style="flex: 1; background: var(--primary);" onclick="submitBreakStock()">Break Stock</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeBreakStockPopup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <script src="sidebar.js?v=3"></script>
+    <script src="app.js?v=3"></script>
+</body>
+
+</html>

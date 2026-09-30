@@ -1,0 +1,478 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Expenses | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+    <script src="libs/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:0.25rem;">
+                    <button onclick="window.location.href='index.html'" class="btn btn-outline small"
+                        style="padding:8px; border-radius:10px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size:1.5rem;">Expenses</h1>
+                </div>
+                <p>Track daily business expenses</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="exportExpensesCSV()" class="btn btn-outline"
+                    style="color:#059669; border-color:#059669;">
+                    <i class="fas fa-file-export"></i> Export CSV
+                </button>
+                <button onclick="window.location.href='index.html'" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
+
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stat-grid" style="margin-bottom:2rem;">
+            <div class="stat-card"
+                style="border-left:4px solid var(--danger); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="label">Today's Expenses</div>
+                    <div id="todayExpenses" class="value" style="font-size:1.75rem; color:var(--danger);">₹0</div>
+                </div>
+                <div
+                    style="background:rgba(239,68,68,0.1); color:var(--danger); padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+            </div>
+            <div class="stat-card"
+                style="border-left:4px solid #f59e0b; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="label">This Month</div>
+                    <div id="monthExpenses" class="value" style="font-size:1.75rem; color:#f59e0b;">₹0</div>
+                </div>
+                <div
+                    style="background:rgba(245,158,11,0.1); color:#f59e0b; padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+            </div>
+            <div class="stat-card"
+                style="border-left:4px solid var(--primary); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="label">This Year</div>
+                    <div id="yearExpenses" class="value" style="font-size:1.75rem; color:var(--primary);">₹0</div>
+                </div>
+                <div
+                    style="background:rgba(99,102,241,0.1); color:var(--primary); padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+            </div>
+            <div class="stat-card"
+                style="border-left:4px solid var(--secondary); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="label">Top Category</div>
+                    <div id="topCategory" class="value" style="font-size:1.25rem; color:var(--secondary);">—</div>
+                </div>
+                <div
+                    style="background:rgba(16,185,129,0.1); color:var(--secondary); padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-tags"></i>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:2rem; flex-wrap:wrap; align-items:start;">
+
+            <!-- ADD EXPENSE FORM -->
+            <div style="width:320px; flex-shrink:0;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 id="formTitle">Add Expense</h2>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="expDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="expCategory" style="width:100%;">
+                            <option value="Rent">Rent</option>
+                            <option value="Electricity">Electricity</option>
+                            <option value="Salaries">Salaries</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Office Supplies">Office Supplies</option>
+                            <option value="Packaging">Packaging</option>
+                            <option value="Fuel">Fuel</option>
+                            <option value="Bank Charges">Bank Charges</option>
+                            <option value="Taxes & Fees">Taxes & Fees</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount (₹) <span style="color:red;">*</span></label>
+                        <input type="number" id="expAmount" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input id="expDesc" placeholder="Brief note (optional)">
+                    </div>
+                    <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                        <button class="btn btn-primary" style="flex:1; background:var(--danger);"
+                            onclick="saveExpense()">
+                            <i class="fas fa-save"></i> <span id="saveBtnText">Save</span>
+                        </button>
+                        <button id="cancelBtn" class="btn btn-outline" style="display:none;" onclick="resetForm()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Category Chart -->
+                <div class="card" style="margin-top:1.5rem;">
+                    <div class="card-header">
+                        <h2>By Category</h2>
+                    </div>
+                    <canvas id="categoryChart" height="220"></canvas>
+                </div>
+            </div>
+
+            <!-- EXPENSE TABLE -->
+            <div class="card" style="flex:1; min-width:400px; padding:0; overflow:hidden;">
+                <div class="card-header" style="padding:1.25rem 1.5rem; margin-bottom:0; background:#f9fafb;">
+                    <div style="display:flex; align-items:center; gap:1rem; flex:1;">
+                        <i class="fas fa-search" style="color:var(--text-muted);"></i>
+                        <input id="searchInput" placeholder="Search expenses..."
+                            style="margin-bottom:0; border:none; background:transparent; font-size:0.95rem; width:100%;"
+                            onkeyup="filterExpenses()">
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+                        <select id="filterMonth" onchange="loadExpenses()"
+                            style="font-size:0.85rem; width:130px; margin-bottom:0;">
+                            <option value="">All Time</option>
+                        </select>
+                        <select id="filterCategory" onchange="filterExpenses()"
+                            style="font-size:0.85rem; width:130px; margin-bottom:0;">
+                            <option value="">All Categories</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Electricity">Electricity</option>
+                            <option value="Salaries">Salaries</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Office Supplies">Office Supplies</option>
+                            <option value="Packaging">Packaging</option>
+                            <option value="Fuel">Fuel</option>
+                            <option value="Bank Charges">Bank Charges</option>
+                            <option value="Taxes & Fees">Taxes & Fees</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseTable">
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                                    Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div
+                    style="padding:1rem 1.5rem; background:#f9fafb; border-top:1px solid var(--border); display:flex; justify-content:space-between;">
+                    <span style="font-size:0.85rem; color:var(--text-muted);" id="expenseCount">0 expenses</span>
+                    <span style="font-size:0.9rem; font-weight:700; color:var(--danger);">Total: <span
+                            id="filteredTotal">₹0</span></span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="toast"></div>
+    <script src="sidebar.js"></script>
+    <script>
+        let allExpenses = [];
+        let editingId = null;
+        let categoryChart = null;
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = `toast-${type}`;
+            t.style.display = "block";
+            setTimeout(() => t.style.display = "none", 3000);
+        }
+
+        // Set today's date as default
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById("expDate").value = today;
+
+            // Populate month filter
+            const sel = document.getElementById("filterMonth");
+            const now = new Date();
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                const label = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+                const opt = document.createElement("option");
+                opt.value = val;
+                opt.text = label;
+                if (i === 0) opt.selected = true;
+                sel.appendChild(opt);
+            }
+
+            loadExpenses();
+            loadStats();
+        });
+
+        async function loadExpenses() {
+            try {
+                const month = document.getElementById("filterMonth").value;
+                let params = {};
+                if (month) {
+                    const [y, m] = month.split('-').map(Number);
+                    const lastDay = new Date(y, m, 0).getDate();
+                    params.from = `${month}-01`;
+                    params.to = `${month}-${String(lastDay).padStart(2, '0')}`;
+                }
+                const res = await fetch(window.apiUrl("/expenses", params));
+                allExpenses = await res.json();
+                filterExpenses();
+                buildCategoryChart(allExpenses);
+            } catch (e) { showToast("Failed to load âŒ", "error"); }
+        }
+
+        function filterExpenses() {
+            const q = document.getElementById("searchInput").value.toLowerCase();
+            const cat = document.getElementById("filterCategory").value;
+            let filtered = allExpenses.filter(e =>
+                (!q || (e.description && e.description.toLowerCase().includes(q)) || e.category.toLowerCase().includes(q)) &&
+                (!cat || e.category === cat)
+            );
+            renderExpenses(filtered);
+        }
+
+        const categoryColors = {
+            "Rent": "#ef4444", "Electricity": "#f59e0b", "Salaries": "#6366f1",
+            "Transport": "#0ea5e9", "Maintenance": "#10b981", "Marketing": "#8b5cf6",
+            "Office Supplies": "#ec4899", "Packaging": "#14b8a6", "Fuel": "#f97316",
+            "Bank Charges": "#64748b", "Taxes & Fees": "#dc2626", "Other": "#94a3b8"
+        };
+
+        function renderExpenses(list) {
+            const tbody = document.getElementById("expenseTable");
+            const countEl = document.getElementById("expenseCount");
+            const totalEl = document.getElementById("filteredTotal");
+
+            const total = list.reduce((s, e) => s + (e.amount || 0), 0);
+            if (countEl) countEl.innerText = `${list.length} expense${list.length !== 1 ? 's' : ''}`;
+            if (totalEl) totalEl.innerText = `₹${Math.round(total).toLocaleString('en-IN')}`;
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">No expenses found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(e => {
+                const color = categoryColors[e.category] || "#64748b";
+                return `
+            <tr>
+                <td style="color:var(--text-muted); font-size:0.85rem;">${new Date(e.date).toLocaleDateString('en-IN')}</td>
+                <td>
+                    <span style="background:${color}20; color:${color}; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;">
+                        ${e.category}
+                    </span>
+                </td>
+                <td style="color:var(--text-muted); font-size:0.85rem;">${e.description || '—'}</td>
+                <td style="font-weight:700; color:var(--danger);">₹${Math.round(e.amount).toLocaleString('en-IN')}</td>
+                <td style="text-align:right;">
+                    <div style="display:flex; gap:6px; justify-content:flex-end;">
+                        <button class="btn btn-outline" style="padding:5px 9px; color:var(--secondary); border-color:var(--secondary);" onclick="editExpense(${e.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline" style="padding:5px 9px; color:var(--danger); border-color:var(--danger);" onclick="deleteExpense(${e.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+            }).join("");
+        }
+
+        async function saveExpense() {
+            const amount = parseFloat(document.getElementById("expAmount").value);
+            if (!amount || amount <= 0) { showToast("Valid amount required âŒ", "error"); return; }
+
+            const data = {
+                date: document.getElementById("expDate").value || new Date().toISOString(),
+                category: document.getElementById("expCategory").value,
+                description: document.getElementById("expDesc").value.trim(),
+                amount,
+                shop_id: window.SHOP_ID
+            };
+
+            try {
+                const res = await fetch(window.API + "/add-expense", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast("Expense saved ✅");
+                    resetForm();
+                    loadExpenses();
+                    loadStats();
+                } else { showToast("Failed âŒ", "error"); }
+            } catch (e) { showToast("Connection error âŒ", "error"); }
+        }
+
+        function editExpense(id) {
+            const e = allExpenses.find(x => x.id === id);
+            if (!e) return;
+            editingId = id;
+            document.getElementById("expDate").value = e.date.slice(0, 10);
+            document.getElementById("expCategory").value = e.category;
+            document.getElementById("expAmount").value = e.amount;
+            document.getElementById("expDesc").value = e.description || "";
+            document.getElementById("saveBtnText").innerText = "Update";
+            document.getElementById("cancelBtn").style.display = "inline-flex";
+            document.getElementById("formTitle").innerText = "Edit Expense";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            editingId = null;
+            document.getElementById("expDate").value = new Date().toISOString().slice(0, 10);
+            document.getElementById("expCategory").value = "Rent";
+            document.getElementById("expAmount").value = "";
+            document.getElementById("expDesc").value = "";
+            document.getElementById("saveBtnText").innerText = "Save";
+            document.getElementById("cancelBtn").style.display = "none";
+            document.getElementById("formTitle").innerText = "Add Expense";
+        }
+
+        async function deleteExpense(id) {
+            if (!confirm("Delete this expense?")) return;
+            try {
+                const res = await fetch(window.API + "/delete-expense/" + id, { method: "DELETE" });
+                if (res.ok) { showToast("Deleted ✅"); loadExpenses(); loadStats(); }
+            } catch (e) { showToast("Failed âŒ", "error"); }
+        }
+
+        async function loadStats() {
+            try {
+                const now = new Date();
+                const todayStr = now.toISOString().slice(0, 10);
+                const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+                const yearStart = `${now.getFullYear()}-01-01`;
+                const yearEnd = `${now.getFullYear()}-12-31`;
+
+                const [todayRes, monthRes, yearRes] = await Promise.all([
+                    fetch(window.apiUrl("/expenses", { from: todayStr, to: todayStr })),
+                    fetch(window.apiUrl("/expenses", { from: monthStart, to: todayStr })),
+                    fetch(window.apiUrl("/expenses", { from: yearStart, to: yearEnd }))
+                ]);
+
+                const [todayData, monthData, yearData] = await Promise.all([
+                    todayRes.json(), monthRes.json(), yearRes.json()
+                ]);
+
+                const sum = arr => arr.reduce((s, e) => s + (e.amount || 0), 0);
+                document.getElementById("todayExpenses").innerText = `₹${Math.round(sum(todayData)).toLocaleString('en-IN')}`;
+                document.getElementById("monthExpenses").innerText = `₹${Math.round(sum(monthData)).toLocaleString('en-IN')}`;
+                document.getElementById("yearExpenses").innerText = `₹${Math.round(sum(yearData)).toLocaleString('en-IN')}`;
+
+                // Top category this month
+                const catTotals = {};
+                monthData.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
+                const topCat = Object.entries(catTotals).sort((a, b) => b[1] - a[1])[0];
+                document.getElementById("topCategory").innerText = topCat ? topCat[0] : "—";
+
+            } catch (e) { console.error("Stats error:", e); }
+        }
+
+        function buildCategoryChart(expenses) {
+            const ctx = document.getElementById("categoryChart").getContext("2d");
+            const catTotals = {};
+            expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
+            const labels = Object.keys(catTotals);
+            const values = Object.values(catTotals);
+            const colors = labels.map(l => categoryColors[l] || "#94a3b8");
+
+            if (categoryChart) categoryChart.destroy();
+
+            if (labels.length === 0) {
+                const canvas = document.getElementById("categoryChart");
+                const ctx2 = canvas.getContext("2d");
+                ctx2.clearRect(0, 0, canvas.width, canvas.height);
+                ctx2.fillStyle = "#94a3b8";
+                ctx2.font = "14px Inter";
+                ctx2.textAlign = "center";
+                ctx2.fillText("No data yet", canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ₹${Math.round(ctx.raw).toLocaleString('en-IN')}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportExpensesCSV() {
+            if (!allExpenses || allExpenses.length === 0) { showToast("No data to export âŒ", "error"); return; }
+            const headers = ["date", "category", "description", "amount"];
+            const rows = allExpenses.map(e => headers.map(h => `"${e[h] || ''}"`).join(","));
+            const csv = [headers.join(","), ...rows].join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `expenses_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast("Exported ✅");
+        }
+
+        window.saveExpense = saveExpense;
+        window.editExpense = editExpense;
+        window.deleteExpense = deleteExpense;
+        window.resetForm = resetForm;
+        window.filterExpenses = filterExpenses;
+        window.exportExpensesCSV = exportExpensesCSV;
+    </script>
+</body>
+
+</html>

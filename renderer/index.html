@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard | APNA ENTERPRISES</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:0.5rem;">
+                    <div style="width:40px; height:40px; border-radius:10px; overflow:hidden;">
+                        <img src="logo.png" alt="Logo" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div>
+                        <h1 style="font-size:1.5rem;" id="shopTitle">APNA ENTERPRISES</h1>
+                        <small style="color:var(--text-muted); font-size:0.75rem;" id="shopSubtitle">Dashboard</small>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <!-- Server Status -->
+                <div id="serverStatus"
+                    style="display:flex; align-items:center; gap:8px; font-size:0.8rem; background:white; padding:7px 14px; border-radius:50px; box-shadow:var(--shadow); border:1px solid var(--border);">
+                    <span class="status-dot"
+                        style="width:9px; height:9px; border-radius:50%; background:#ef4444;"></span>
+                    <span id="statusText" style="font-weight:600; color:#4b5563;">Connecting...</span>
+                    <span id="ipDisplay"
+                        style="margin-left:8px; padding-left:8px; border-left:1px solid var(--border); color:var(--text-muted); font-family:monospace;">---</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stat-grid" style="margin-bottom:2rem;">
+
+            <div class="stat-card"
+                style="display:flex; justify-content:space-between; align-items:center; border-left:4px solid var(--primary);">
+                <div>
+                    <div class="label">Today's Gross Revenue</div>
+                    <div id="todaySales" class="value" style="font-size:1.75rem;">₹0</div>
+                    <div id="todaySalesTrend" class="trend">—</div>
+                </div>
+                <div
+                    style="background:rgba(99,102,241,0.1); color:var(--primary); padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="display:flex; justify-content:space-between; align-items:center; border-left:4px solid var(--secondary);">
+                <div>
+                    <div class="label">Today's Net Profit</div>
+                    <div id="todayProfit" class="value" style="font-size:1.75rem;">₹0</div>
+                    <div id="todayProfitTrend" class="trend">—</div>
+                </div>
+                <div
+                    style="background:rgba(16,185,129,0.1); color:var(--secondary); padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-wallet"></i>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="display:flex; justify-content:space-between; align-items:center; border-left:4px solid #f59e0b;">
+                <div>
+                    <div class="label">Today's Expenses</div>
+                    <div id="todayExpenses" class="value" style="font-size:1.75rem;">₹0</div>
+                    <div class="trend" style="color:var(--text-muted);">Recorded today</div>
+                </div>
+                <div
+                    style="background:rgba(245,158,11,0.1); color:#f59e0b; padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-receipt"></i>
+                </div>
+            </div>
+
+            <div id="lowStockCard" class="stat-card"
+                style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-left:4px solid var(--danger);">
+                <div>
+                    <div class="label">Low Stock Alerts</div>
+                    <div id="lowStockCount" class="value" style="font-size:1.75rem; color:var(--danger);">0</div>
+                    <div class="trend down">Items need restock</div>
+                </div>
+                <div
+                    style="background:rgba(239,68,68,0.1); color:var(--danger); padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="display:flex; justify-content:space-between; align-items:center; border-left:4px solid #8b5cf6;">
+                <div>
+                    <div class="label">Total Stock Value (at Cost)</div>
+                    <div id="inventoryValue" class="value" style="font-size:1.75rem;">₹0</div>
+                    <div class="trend" style="color:var(--text-muted);">Current stock valuation</div>
+                </div>
+                <div
+                    style="background:rgba(139,92,246,0.1); color:#8b5cf6; padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-calculator"></i>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="display:flex; justify-content:space-between; align-items:center; border-left:4px solid #06b6d4;">
+                <div>
+                    <div class="label">Unique SKU Count</div>
+                    <div id="uniqueProducts" class="value" style="font-size:1.75rem;">0</div>
+                    <div class="trend" style="color:var(--text-muted);">Active products in system</div>
+                </div>
+                <div
+                    style="background:rgba(6,182,212,0.1); color:#06b6d4; padding:1rem; border-radius:12px; font-size:1.25rem;">
+                    <i class="fas fa-barcode"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div style="margin-bottom:2rem;">
+            <h2 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem; color:var(--text-main);">Quick Actions
+            </h2>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+
+                <div class="action-box" onclick="window.location.href='billing.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:var(--primary); color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">New Sale Bill</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Create GST tax invoice</p>
+                </div>
+
+                <div class="action-box" onclick="window.location.href='purchases.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#f59e0b; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-cart-arrow-down"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">New Purchase</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Record supplier purchase</p>
+                </div>
+
+                <div class="action-box" onclick="window.location.href='product.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:var(--secondary); color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Inventory</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Manage stock & prices</p>
+                </div>
+
+                <div class="action-box" onclick="window.location.href='customers.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#8b5cf6; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Customers</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Manage customer list</p>
+                </div>
+
+                <div class="action-box" onclick="window.location.href='suppliers.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#0ea5e9; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Suppliers</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Manage supplier list</p>
+                </div>
+
+                <div class="action-box" onclick="window.location.href='expenses.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#ef4444; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Expenses</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Track daily expenses</p>
+                </div>
+
+                <div class="action-box" onclick="window.location.href='reports.html'"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#10b981; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Reports</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">GST & P&L reports</p>
+                </div>
+
+                <div class="action-box" onclick="downloadBackup()"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#64748b; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Backup Data</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Download shop data</p>
+                </div>
+
+                <!-- RESTORE BACKUP BUTTON (new — does not touch existing backup feature) -->
+                <div class="action-box" onclick="document.getElementById('restoreFileInput').click()"
+                    style="cursor:pointer; background:white; padding:1.25rem; border-radius:1rem; border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.2s;">
+                    <div
+                        style="background:#10b981; color:white; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.75rem;">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin-bottom:0.2rem;">Restore Backup</h3>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Restore from .json file</p>
+                </div>
+                <!-- Hidden file input for restore -->
+                <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="restoreBackup(this)">
+
+            </div>
+        </div>
+
+        <!-- RECENT SALES -->
+        <div class="card">
+            <div class="card-header">
+                <h2 style="font-size:1rem;">Recent Sales</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>GST</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentSalesTable">
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LOW STOCK POPUP -->
+    <div class="popup" id="stockPopup">
+        <div class="popup-box" style="width:600px; max-width:90vw; border-radius:15px;">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);">
+                <h2 style="font-size:1.1rem;">⚠️¸ Low Stock Items</h2>
+                <div style="display:flex; gap:8px;">
+                    <button id="downloadStockCsv" class="btn btn-outline small">Download CSV</button>
+                    <button id="closeStockPopup" class="btn btn-primary small"
+                        style="background:var(--danger); border:none;">Close</button>
+                </div>
+            </div>
+            <div style="max-height:350px; overflow:auto;">
+                <div class="table-container">
+                    <table id="stockTable">
+                        <thead style="position:sticky; top:0; background:#f9fafb;">
+                            <tr>
+                                <th>Product</th>
+                                <th>HSN</th>
+                                <th>Qty</th>
+                                <th>Min Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="sidebar.js"></script>
+    <script src="dashboard.js"></script>
+
+    <script>
+        (function () {
+            // Set shop title
+            document.addEventListener("DOMContentLoaded", () => {
+                const shopName = sessionStorage.getItem("shopName") || "Apna Enterprises";
+                const shopId = sessionStorage.getItem("shop_id") || "1";
+                const titleEl = document.getElementById("shopTitle");
+                const subtitleEl = document.getElementById("shopSubtitle");
+                if (titleEl) titleEl.innerText = shopName.toUpperCase();
+                if (subtitleEl) subtitleEl.innerText = `Shop ${shopId} · Dashboard`;
+            });
+
+            // Server status check
+            async function checkConnection() {
+                const statusText = document.getElementById("statusText");
+                const dot = document.querySelector(".status-dot");
+                try {
+                    const res = await fetch(window.API + "/ping");
+                    if (res.ok) {
+                        const data = await res.json();
+                        dot.style.background = "#10b981";
+                        statusText.innerText = "Online";
+                        if (data.ip) document.getElementById("ipDisplay").innerText = data.ip + ":4000";
+                    } else throw new Error();
+                } catch {
+                    dot.style.background = "#ef4444";
+                    statusText.innerText = "Offline";
+                    document.getElementById("ipDisplay").innerText = "Local";
+                }
+            }
+
+            // Load recent sales
+            async function loadRecentSales() {
+                try {
+                    const res = await fetch(window.apiUrl("/sales-history", { limit: 8 }));
+                    const sales = await res.json();
+                    const tbody = document.getElementById("recentSalesTable");
+                    if (!sales || sales.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">No sales recorded yet</td></tr>`;
+                        return;
+                    }
+                    tbody.innerHTML = sales.map(s => `
+                <tr>
+                    <td><code style="background:#f1f5f9; padding:3px 8px; border-radius:5px; font-size:0.8rem;">${s.invoice_number || '-'}</code></td>
+                    <td>${s.customer_name || 'Walk-in'}</td>
+                    <td style="color:var(--text-muted); font-size:0.8rem;">${new Date(s.date).toLocaleDateString('en-IN')}</td>
+                    <td style="font-weight:700; color:var(--primary);">₹${Math.round(s.total_amount).toLocaleString('en-IN')}</td>
+                    <td style="color:var(--text-muted);">₹${Math.round(s.gst_amount || 0).toLocaleString('en-IN')}</td>
+                </tr>
+            `).join("");
+                } catch (e) { console.error("Recent sales error:", e); }
+            }
+
+            // Backup download
+            window.downloadBackup = async function () {
+                try {
+                    const res = await fetch(window.apiUrl("/backup"));
+                    const data = await res.json();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `backup_shop${window.SHOP_ID}_${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    const t = document.getElementById("toast");
+                    if (t) { t.innerText = "Backup downloaded ✅"; t.className = "toast-success"; t.style.display = "block"; setTimeout(() => t.style.display = "none", 3000); }
+                } catch (e) { alert("Backup failed ❌"); }
+            };
+
+            // ── Restore Backup ──
+            window.restoreBackup = async function (input) {
+                const file = input.files[0];
+                input.value = ''; // reset so same file can be selected again
+                if (!file) return;
+
+                // Read the file
+                let backupData;
+                try {
+                    const text = await file.text();
+                    backupData = JSON.parse(text);
+                } catch (e) {
+                    return alert('❌ Invalid file. Please select a valid Apna Enterprises backup (.json) file.');
+                }
+
+                // Basic validation
+                if (!backupData.data || !backupData.shop_id) {
+                    return alert('❌ This does not look like an Apna Enterprises backup file.');
+                }
+
+                // Force the backup to restore into the currently logged-in shop
+                const targetShopId = window.SHOP_ID;
+                backupData.shop_id = targetShopId;
+
+                // Rewrite shop_id for all table records to match the current shop
+                if (backupData.data) {
+                    Object.keys(backupData.data).forEach(tableName => {
+                        const rows = backupData.data[tableName];
+                        if (Array.isArray(rows)) {
+                            rows.forEach(row => {
+                                // If the record has a shop_id property, update it to current shop
+                                if (row.shop_id !== undefined && row.shop_id !== null) {
+                                    row.shop_id = targetShopId;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Confirmation before wiping existing data
+                const confirmed = confirm(
+                    `⚠️ WARNING: Restoring backup will REPLACE all existing products, sales, purchases, expenses, and customers for this shop (${window.SHOP_NAME}).\n\nYour shop settings (name, GST, bank details) will NOT be affected.\n\nAre you sure you want to continue?`
+                );
+                if (!confirmed) return;
+
+                const t = document.getElementById('toast');
+                if (t) { t.innerText = '⏳ Restoring backup, please wait...'; t.className = 'toast-success'; t.style.display = 'block'; }
+
+                try {
+                    const res = await fetch(window.API + '/restore-backup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(backupData)
+                    });
+                    const result = await res.json();
+                    if (res.ok && result.success) {
+                        if (t) { t.innerText = '✅ Backup restored successfully! Reloading...'; t.className = 'toast-success'; t.style.display = 'block'; }
+                        setTimeout(() => window.location.reload(), 2000);
+                    } else {
+                        if (t) { t.innerText = '❌ ' + (result.error || 'Restore failed.'); t.className = 'toast-error'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
+                    }
+                } catch (e) {
+                    if (t) { t.innerText = '❌ Restore failed. Check connection.'; t.className = 'toast-error'; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 5000); }
+                }
+            };
+
+            document.addEventListener("DOMContentLoaded", () => {
+                checkConnection();
+                setInterval(checkConnection, 5000);
+                loadRecentSales();
+                setInterval(loadRecentSales, 30000);
+            });
+        })();
+    </script>
+
+</body>
+
+</html>
